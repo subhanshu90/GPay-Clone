@@ -9,29 +9,65 @@ import {
   Receipt, 
   Zap, 
   Search, 
-  MoreVertical, 
   ChevronRight,
   History,
   BarChart3,
-  Copy,
-  QrCode,
-  Share2,
-  Building2,
-  Wallet
+  Wallet,
+  CheckCircle2,
+  ArrowUpRight,
+  ArrowDownLeft
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import PaymentFlow from "@/components/PaymentFlow";
+import QRScanner from "@/components/QRScanner";
+import { MOCK_TRANSACTIONS, MOCK_USER, type Transaction } from "@/lib/mockData";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showScanner, setShowScanner] = useState(false);
+  const [activePayment, setActivePayment] = useState<{name: string, upiId: string, avatar?: string} | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
+
+  const handleScanSuccess = (data: string) => {
+    setShowScanner(false);
+    // Parse mock QR data
+    const params = new URLSearchParams(data.split('?')[1]);
+    setActivePayment({
+      name: params.get('pn') || "Unknown Merchant",
+      upiId: params.get('pa') || "merchant@upi"
+    });
+  };
+
+  const handleTransactionSuccess = (txn: Transaction) => {
+    setTransactions([txn, ...transactions]);
+    setTimeout(() => {
+      setActivePayment(null);
+    }, 2000);
+  };
 
   return (
     <div className="min-h-screen bg-white pb-24 font-sans text-[#202124] relative">
-      
-      {/* Background Pattern (Subtle GPay texture) */}
+      <AnimatePresence>
+        {showScanner && (
+          <QRScanner 
+            onClose={() => setShowScanner(false)} 
+            onScan={handleScanSuccess}
+          />
+        )}
+        {activePayment && (
+          <PaymentFlow 
+            recipient={activePayment} 
+            onClose={() => setActivePayment(null)}
+            onSuccess={handleTransactionSuccess}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Background Pattern */}
       <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-[#F5F8FD] to-white z-0 pointer-events-none" />
 
       {/* Header Section */}
-      <div className="sticky top-0 z-50 bg-[#F5F8FD]/95 backdrop-blur-sm transition-all">
+      <div className="sticky top-0 z-40 bg-[#F5F8FD]/95 backdrop-blur-sm transition-all">
         <div className="px-4 py-3 flex items-center gap-4">
             {/* Search Bar */}
             <div className="flex-1 relative shadow-sm rounded-full">
@@ -50,7 +86,7 @@ export default function Home() {
             {/* Profile Avatar */}
             <div className="relative shrink-0">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm cursor-pointer shadow-md ring-2 ring-white">
-                    A
+                    {MOCK_USER.avatar}
                 </div>
             </div>
         </div>
@@ -59,41 +95,11 @@ export default function Home() {
       {/* Main Content */}
       <div className="relative z-10 pt-2 px-4 space-y-8">
         
-        {/* UPI ID Banner */}
-        <div className="relative overflow-hidden">
-             {/* Background Art */}
-             <div className="bg-white rounded-[1.5rem] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100 relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-[url('https://www.gstatic.com/pay/invite/tez_logo.png')] bg-contain"></div>
-                
-                {/* Content */}
-                <div className="flex flex-col items-center justify-center pt-2">
-                    <div className="relative mb-3">
-                         <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
-                         <QrCode size={42} className="text-[#1F1F1F] relative z-10" strokeWidth={1.5} />
-                    </div>
-                    
-                    <div className="flex items-center gap-2 mb-4 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-                        <span className="text-[0.8rem] text-gray-600 font-medium tracking-wide">upi-id@oksbi</span>
-                        <Copy size={12} className="text-gray-400" />
-                    </div>
-
-                    <div className="flex w-full gap-3">
-                        <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#F8F9FA] rounded-xl text-[0.85rem] font-medium text-[#1F1F1F] hover:bg-gray-100 active:scale-95 transition-all">
-                            <Copy size={16} /> Copy UPI ID
-                        </button>
-                        <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#F8F9FA] rounded-xl text-[0.85rem] font-medium text-[#1F1F1F] hover:bg-gray-100 active:scale-95 transition-all">
-                            <Share2 size={16} /> Share QR
-                        </button>
-                    </div>
-                </div>
-             </div>
-        </div>
-
         {/* Quick Actions Grid */}
         <div>
           <div className="grid grid-cols-4 gap-y-7 gap-x-2">
-            <QuickAction icon={<Scan size={24} />} label="Scan any QR code" />
-            <QuickAction icon={<Users size={24} />} label="Pay contacts" />
+            <QuickAction icon={<Scan size={24} />} label="Scan any QR code" onClick={() => setShowScanner(true)} />
+            <QuickAction icon={<Users size={24} />} label="Pay contacts" onClick={() => setActivePayment({name: "Select Contact", upiId: "contact@upi"})} />
             <QuickAction icon={<Smartphone size={24} />} label="Pay phone number" />
             <QuickAction icon={<Landmark size={24} />} label="Bank transfer" />
             <QuickAction icon={<AtSign size={24} />} label="Pay UPI ID or number" />
@@ -107,8 +113,18 @@ export default function Home() {
         <div>
           <SectionHeader title="People" />
           <div className="grid grid-cols-4 gap-y-6 gap-x-2">
-            <PersonItem name="Rahul" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul" isRecent />
-            <PersonItem name="Priya" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Priya" isRecent />
+            <PersonItem 
+              name="Rahul" 
+              avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul" 
+              isRecent 
+              onClick={() => setActivePayment({name: "Rahul Sharma", upiId: "rahul@okaxis", avatar: "R"})} 
+            />
+            <PersonItem 
+              name="Priya" 
+              avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Priya" 
+              isRecent 
+              onClick={() => setActivePayment({name: "Priya Singh", upiId: "priya@okhdfcbank", avatar: "P"})}
+            />
             <PersonItem name="Amit" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Amit" isRecent />
             <PersonItem name="Sneha" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Sneha" isRecent />
             <PersonItem name="Vikram" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Vikram" />
@@ -149,12 +165,24 @@ export default function Home() {
            </div>
         </div>
 
+        {/* Transaction History */}
+        <div className="pb-4">
+           <SectionHeader title="Transaction History" />
+           <div className="flex flex-col gap-1">
+             {transactions.map((txn) => (
+               <TransactionItem key={txn.id} txn={txn} />
+             ))}
+           </div>
+           <button className="w-full py-4 text-blue-600 font-medium text-sm flex items-center justify-center gap-1 hover:bg-gray-50 rounded-xl transition-colors mt-2">
+              See all payment activity <ChevronRight size={16} />
+           </button>
+        </div>
+
         {/* Footer Actions - Manage Money */}
-        <div className="pt-2 pb-12">
+        <div className="pb-12 border-t border-gray-100 pt-6">
             <h2 className="text-[1rem] font-medium text-[#202124] mb-4 px-1">Manage your money</h2>
             <div className="flex flex-col gap-3">
                 <FooterAction icon={<BarChart3 size={22} />} label="Check your CIBIL score" sublabel="Free at no cost" />
-                <FooterAction icon={<History size={22} />} label="See transaction history" />
                 <FooterAction icon={<Landmark size={22} />} label="Check bank balance" />
                 <FooterAction icon={<Wallet size={22} />} label="Check wallet balance" />
             </div>
@@ -171,9 +199,10 @@ export default function Home() {
       </div>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-8 right-6 z-50">
+      <div className="fixed bottom-8 right-6 z-30">
         <motion.button 
           whileTap={{ scale: 0.95 }}
+          onClick={() => setActivePayment({name: "New Payment", upiId: "payee@upi"})}
           className="bg-blue-600 text-white shadow-[0_6px_16px_rgba(26,115,232,0.3)] rounded-full px-6 py-3.5 flex items-center gap-2.5 font-medium hover:bg-blue-700 transition-colors"
         >
           <span className="text-2xl font-light leading-none mb-0.5">+</span> 
@@ -189,11 +218,12 @@ export default function Home() {
 interface QuickActionProps {
   icon: React.ReactNode;
   label: string;
+  onClick?: () => void;
 }
 
-function QuickAction({ icon, label }: QuickActionProps) {
+function QuickAction({ icon, label, onClick }: QuickActionProps) {
   return (
-    <div className="flex flex-col items-center gap-2.5 cursor-pointer group">
+    <div onClick={onClick} className="flex flex-col items-center gap-2.5 cursor-pointer group">
       <div className="w-12 h-12 rounded-full flex items-center justify-center text-blue-600 mb-1 transition-transform group-active:scale-95">
         {icon}
       </div>
@@ -206,11 +236,12 @@ interface PersonItemProps {
   name: string;
   avatar: string;
   isRecent?: boolean;
+  onClick?: () => void;
 }
 
-function PersonItem({ name, avatar, isRecent }: PersonItemProps) {
+function PersonItem({ name, avatar, isRecent, onClick }: PersonItemProps) {
   return (
-    <div className="flex flex-col items-center gap-2 cursor-pointer group">
+    <div onClick={onClick} className="flex flex-col items-center gap-2 cursor-pointer group">
       <div className="relative">
         <div className="w-[58px] h-[58px] rounded-full overflow-hidden border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.08)] group-hover:shadow-md transition-all">
             <img src={avatar} alt={name} className="w-full h-full object-cover" />
@@ -292,4 +323,34 @@ function SectionHeader({ title, action }: { title: string, action?: string }) {
             )}
         </div>
     )
+}
+
+function TransactionItem({ txn }: { txn: Transaction }) {
+  const isReceived = txn.type === 'received';
+  const date = new Date(txn.date);
+  
+  return (
+    <div className="flex items-center gap-4 py-3 px-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+       <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shrink-0 ${isReceived ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
+         {txn.recipient[0]}
+       </div>
+       <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-[0.95rem] text-[#1F1F1F] truncate">{txn.recipient}</h3>
+          <p className="text-xs text-gray-500 truncate mt-0.5">
+            {date.toLocaleDateString('en-IN', {day: 'numeric', month: 'long'})} • {date.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'})}
+          </p>
+       </div>
+       <div className="text-right">
+          <p className={`font-semibold text-[0.95rem] ${isReceived ? 'text-green-600' : 'text-[#1F1F1F]'}`}>
+            {isReceived ? '+' : '-'} ₹{txn.amount}
+          </p>
+          {txn.status === 'success' && (
+             <div className="flex items-center justify-end gap-1 mt-0.5">
+                <CheckCircle2 size={12} className="text-green-600 fill-green-100" />
+                <span className="text-[0.65rem] font-medium text-gray-500">Paid</span>
+             </div>
+          )}
+       </div>
+    </div>
+  )
 }
