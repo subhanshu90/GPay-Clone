@@ -1,5 +1,15 @@
-import { useState } from "react";
-import { ArrowLeft, Check, ChevronDown, CreditCard, ShieldCheck } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { 
+  ArrowLeft, 
+  Check, 
+  ChevronDown, 
+  ShieldCheck, 
+  Share2, 
+  HelpCircle, 
+  ChevronRight,
+  MoreVertical,
+  RotateCcw
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MOCK_USER, generateTransactionId, generateBankRefId, type Transaction } from "../lib/mockData";
 
@@ -14,6 +24,7 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [pin, setPin] = useState(["", "", "", "", "", ""]);
+  const [currentTxn, setCurrentTxn] = useState<Transaction | null>(null);
 
   const handlePinChange = (index: number, value: string) => {
     if (value.length > 1) return;
@@ -24,6 +35,12 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
     // Auto-focus next input
     if (value && index < 5) {
       document.getElementById(`pin-${index + 1}`)?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !pin[index] && index > 0) {
+      document.getElementById(`pin-${index - 1}`)?.focus();
     }
   };
 
@@ -44,12 +61,13 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
       bankRefId: generateBankRefId()
     };
     
+    setCurrentTxn(newTxn);
     setStep('success');
     
     // Wait for success animation
     setTimeout(() => {
       onSuccess(newTxn);
-    }, 2000);
+    }, 1500); // Slightly faster close to return to home, where details can be viewed
   };
 
   return (
@@ -125,97 +143,132 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
       )}
 
       {step === 'pin' && (
-        <div className="flex-1 bg-[#1a1f2e] text-white flex flex-col">
-           <div className="p-4 flex justify-between items-center border-b border-white/10">
-              <span className="font-medium">UPI PIN</span>
-              <div className="flex items-center gap-2 text-xs opacity-70">
-                 <span>SECURE</span>
-                 <ShieldCheck size={14} />
+        <div className="flex-1 bg-white flex flex-col h-full">
+           {/* UPI Header */}
+           <div className="flex items-center justify-between px-4 py-3 bg-[#1A73E8] text-white">
+              <div className="flex items-center gap-2">
+                 <span className="font-medium text-lg tracking-wide">Google Pay</span>
               </div>
+              <div className="text-xs font-medium bg-white/20 px-2 py-1 rounded">UPI</div>
            </div>
            
-           <div className="flex-1 flex flex-col items-center pt-12 px-6">
-              <div className="w-full bg-white/5 rounded-lg p-4 mb-8 flex justify-between items-center">
-                 <div className="flex flex-col">
-                    <span className="text-xs text-gray-400 mb-1">Paying to</span>
-                    <span className="font-medium text-lg">{recipient.name}</span>
-                    <span className="text-xs text-gray-400">{recipient.upiId}</span>
-                 </div>
-                 <span className="text-xl font-medium">₹{amount}</span>
+           {/* Bank Header Section */}
+           <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <div>
+                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">TO</p>
+                 <p className="text-sm font-semibold text-gray-800">{recipient.name}</p>
+                 <p className="text-xs text-gray-500">{recipient.upiId}</p>
               </div>
-
-              <p className="text-sm text-gray-400 mb-6">ENTER 6-DIGIT UPI PIN</p>
-              
-              <div className="flex gap-4 mb-8">
-                 {pin.map((digit, i) => (
-                    <input
-                      key={i}
-                      id={`pin-${i}`}
-                      type="password"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handlePinChange(i, e.target.value)}
-                      className="w-10 h-10 rounded bg-white/10 border border-white/20 text-center text-xl text-white focus:border-blue-400 focus:bg-white/20 transition-all outline-none"
-                    />
-                 ))}
+              <div className="text-right">
+                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">SENDING</p>
+                  <p className="text-lg font-bold text-gray-900">₹{parseFloat(amount).toFixed(2)}</p>
               </div>
            </div>
 
-           <div className="p-4 grid grid-cols-2 gap-4">
-              <button onClick={() => setStep('amount')} className="py-3 text-sm font-medium text-red-400">CANCEL</button>
+           {/* PIN Entry Area */}
+           <div className="flex-1 flex flex-col items-center pt-12">
+              <p className="text-sm font-medium text-gray-700 mb-8 tracking-wide">ENTER 6-DIGIT UPI PIN</p>
+              
+              <div className="flex gap-3 mb-12">
+                 {pin.map((digit, i) => (
+                    <div key={i} className="relative">
+                        <input
+                          id={`pin-${i}`}
+                          type="password"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handlePinChange(i, e.target.value)}
+                          onKeyDown={(e) => handleKeyDown(i, e)}
+                          className="w-10 h-10 border-b-2 border-gray-300 text-center text-2xl text-gray-800 focus:border-[#1A73E8] transition-colors outline-none bg-transparent font-bold"
+                        />
+                        {/* Dot mask for entered PIN */}
+                        {digit && (
+                           <div className="absolute inset-0 flex items-center justify-center bg-white pointer-events-none">
+                              <div className="w-3 h-3 bg-black rounded-full"></div>
+                           </div>
+                        )}
+                    </div>
+                 ))}
+              </div>
+              
+              {/* Warnings/Security Text */}
+              <div className="mt-auto mb-8 px-8 text-center">
+                 <div className="flex items-center justify-center gap-2 mb-2">
+                    <ShieldCheck size={16} className="text-green-600" />
+                    <span className="text-xs font-medium text-gray-600">UPI SECURE</span>
+                 </div>
+                 <p className="text-[10px] text-gray-400 max-w-xs mx-auto">
+                    Do not share your UPI PIN with anyone. Google Pay or your bank will never ask for it.
+                 </p>
+              </div>
+           </div>
+
+           {/* Keyboard/Actions Area */}
+           <div className="bg-[#F8F9FA] px-4 py-3 flex justify-between items-center border-t border-gray-200">
+              <button 
+                onClick={() => setStep('amount')}
+                className="px-6 py-2 text-sm font-bold text-gray-600 uppercase tracking-wide hover:bg-gray-200 rounded transition-colors"
+              >
+                Cancel
+              </button>
+              
               <button 
                 onClick={handlePayment}
                 disabled={pin.some(p => !p)}
-                className="bg-blue-600 text-white rounded-full py-3 text-sm font-medium shadow-lg disabled:opacity-50"
+                className="w-14 h-14 bg-[#1A73E8] rounded-full flex items-center justify-center text-white shadow-md disabled:opacity-50 disabled:shadow-none hover:bg-blue-700 active:scale-95 transition-all"
               >
-                SUBMIT
+                <Check size={28} strokeWidth={3} />
               </button>
            </div>
-           <div className="flex justify-center pb-6 opacity-30">
-               <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" className="h-4 invert" alt="UPI" />
+           
+           {/* Standard Android Nav Bar Placeholder */}
+           <div className="h-12 bg-black flex items-center justify-around px-12">
+               <div className="w-4 h-4 border-2 border-gray-500 rotate-45 rounded-[2px]"></div>
+               <div className="w-4 h-4 border-2 border-gray-500 rounded-full"></div>
+               <div className="w-4 h-4 border-2 border-gray-500 rounded-[2px]"></div>
            </div>
         </div>
       )}
 
       {step === 'processing' && (
         <div className="flex-1 flex flex-col items-center justify-center bg-white">
-           <div className="w-20 h-20 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin mb-6"></div>
-           <h3 className="text-lg font-medium text-gray-900">Processing Payment...</h3>
-           <p className="text-sm text-gray-500 mt-2">Do not close this window</p>
+           <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-blue-600 animate-spin mb-6"></div>
+           <h3 className="text-lg font-medium text-gray-900">Processing payment...</h3>
         </div>
       )}
 
-      {step === 'success' && (
+      {step === 'success' && currentTxn && (
         <div className="flex-1 flex flex-col items-center justify-center bg-white relative overflow-hidden">
-           <motion.div 
-             initial={{ scale: 0 }}
-             animate={{ scale: 1 }}
-             className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-white mb-6 shadow-xl relative z-10"
-           >
-              <Check size={48} strokeWidth={3} />
-           </motion.div>
-           
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.3 }}
-             className="text-center"
-           >
-             <h2 className="text-2xl font-bold text-gray-900 mb-1">₹{amount}</h2>
-             <p className="text-lg font-medium text-gray-800 mb-1">Paid to {recipient.name}</p>
-             <p className="text-sm text-gray-500">{recipient.upiId}</p>
-           </motion.div>
-
            {/* Audio sound effect visualization */}
            <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
               <motion.div 
                  initial={{ scale: 0.5, opacity: 0 }}
                  animate={{ scale: 3, opacity: 0 }}
                  transition={{ duration: 1.5, repeat: Infinity }}
-                 className="w-48 h-48 bg-blue-100 rounded-full"
+                 className="w-64 h-64 bg-blue-50 rounded-full"
               />
            </div>
+
+           <motion.div 
+             initial={{ scale: 0 }}
+             animate={{ scale: 1 }}
+             className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white mb-6 shadow-xl relative z-10"
+           >
+              <Check size={40} strokeWidth={4} />
+           </motion.div>
+           
+           <motion.div
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.2 }}
+             className="text-center z-10"
+           >
+             <h2 className="text-3xl font-medium text-gray-900 mb-1">₹{amount}</h2>
+             <div className="flex items-center justify-center gap-1.5 text-gray-600 mt-2">
+                <span className="text-sm">Paid to {recipient.name}</span>
+             </div>
+           </motion.div>
         </div>
       )}
     </div>

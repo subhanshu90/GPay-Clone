@@ -13,13 +13,15 @@ import {
   History,
   BarChart3,
   Wallet,
-  CheckCircle2,
-  ArrowUpRight,
-  ArrowDownLeft
+  Home as HomeIcon,
+  CircleDollarSign,
+  UserCircle2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import PaymentFlow from "@/components/PaymentFlow";
 import QRScanner from "@/components/QRScanner";
+import TransactionHistory from "@/components/TransactionHistory";
+import TransactionDetail from "@/components/TransactionDetail";
 import { MOCK_TRANSACTIONS, MOCK_USER, type Transaction } from "@/lib/mockData";
 
 export default function Home() {
@@ -27,6 +29,9 @@ export default function Home() {
   const [showScanner, setShowScanner] = useState(false);
   const [activePayment, setActivePayment] = useState<{name: string, upiId: string, avatar?: string} | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedTxn, setSelectedTxn] = useState<Transaction | null>(null);
+  const [activeTab, setActiveTab] = useState<'home' | 'money' | 'you'>('home');
 
   const handleScanSuccess = (data: string) => {
     setShowScanner(false);
@@ -42,6 +47,7 @@ export default function Home() {
     setTransactions([txn, ...transactions]);
     setTimeout(() => {
       setActivePayment(null);
+      // Optional: Show detail of just completed txn
     }, 2000);
   };
 
@@ -60,6 +66,18 @@ export default function Home() {
             onClose={() => setActivePayment(null)}
             onSuccess={handleTransactionSuccess}
           />
+        )}
+        {showHistory && (
+          <TransactionHistory 
+            transactions={transactions} 
+            onClose={() => setShowHistory(false)} 
+          />
+        )}
+        {selectedTxn && (
+           <TransactionDetail 
+             txn={selectedTxn} 
+             onClose={() => setSelectedTxn(null)} 
+           />
         )}
       </AnimatePresence>
 
@@ -165,24 +183,16 @@ export default function Home() {
            </div>
         </div>
 
-        {/* Transaction History */}
-        <div className="pb-4">
-           <SectionHeader title="Transaction History" />
-           <div className="flex flex-col gap-1">
-             {transactions.map((txn) => (
-               <TransactionItem key={txn.id} txn={txn} />
-             ))}
-           </div>
-           <button className="w-full py-4 text-blue-600 font-medium text-sm flex items-center justify-center gap-1 hover:bg-gray-50 rounded-xl transition-colors mt-2">
-              See all payment activity <ChevronRight size={16} />
-           </button>
-        </div>
-
         {/* Footer Actions - Manage Money */}
         <div className="pb-12 border-t border-gray-100 pt-6">
             <h2 className="text-[1rem] font-medium text-[#202124] mb-4 px-1">Manage your money</h2>
             <div className="flex flex-col gap-3">
                 <FooterAction icon={<BarChart3 size={22} />} label="Check your CIBIL score" sublabel="Free at no cost" />
+                <FooterAction 
+                   icon={<History size={22} />} 
+                   label="See transaction history" 
+                   onClick={() => setShowHistory(true)}
+                />
                 <FooterAction icon={<Landmark size={22} />} label="Check bank balance" />
                 <FooterAction icon={<Wallet size={22} />} label="Check wallet balance" />
             </div>
@@ -199,7 +209,7 @@ export default function Home() {
       </div>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-8 right-6 z-30">
+      <div className="fixed bottom-24 right-6 z-30">
         <motion.button 
           whileTap={{ scale: 0.95 }}
           onClick={() => setActivePayment({name: "New Payment", upiId: "payee@upi"})}
@@ -209,11 +219,44 @@ export default function Home() {
           <span className="tracking-wide">New payment</span>
         </motion.button>
       </div>
+
+      {/* Bottom Navigation Bar */}
+      <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 py-3 px-6 flex justify-around items-center z-50 pb-safe">
+         <NavItem 
+            icon={<HomeIcon size={24} />} 
+            label="Home" 
+            isActive={activeTab === 'home'} 
+            onClick={() => setActiveTab('home')} 
+         />
+         <NavItem 
+            icon={<CircleDollarSign size={24} />} 
+            label="Money" 
+            isActive={activeTab === 'money'} 
+            onClick={() => setActiveTab('money')} 
+         />
+         <NavItem 
+            icon={<UserCircle2 size={24} />} 
+            label="You" 
+            isActive={activeTab === 'you'} 
+            onClick={() => setActiveTab('you')} 
+         />
+      </div>
     </div>
   );
 }
 
 // --- Components ---
+
+function NavItem({ icon, label, isActive, onClick }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void }) {
+    return (
+        <button onClick={onClick} className="flex flex-col items-center gap-1 w-16">
+            <div className={`transition-colors ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>
+                {icon}
+            </div>
+            {isActive && <span className="text-[10px] font-medium text-blue-600">{label}</span>}
+        </button>
+    )
+}
 
 interface QuickActionProps {
   icon: React.ReactNode;
@@ -295,11 +338,12 @@ interface FooterActionProps {
   icon: React.ReactNode;
   label: string;
   sublabel?: string;
+  onClick?: () => void;
 }
 
-function FooterAction({ icon, label, sublabel }: FooterActionProps) {
+function FooterAction({ icon, label, sublabel, onClick }: FooterActionProps) {
     return (
-        <div className="flex items-center gap-4 py-3 px-1 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors group">
+        <div onClick={onClick} className="flex items-center gap-4 py-3 px-1 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors group">
             <div className="text-blue-600 bg-blue-50 p-2.5 rounded-full group-hover:bg-blue-100 transition-colors">
                 {icon}
             </div>
@@ -323,34 +367,4 @@ function SectionHeader({ title, action }: { title: string, action?: string }) {
             )}
         </div>
     )
-}
-
-function TransactionItem({ txn }: { txn: Transaction }) {
-  const isReceived = txn.type === 'received';
-  const date = new Date(txn.date);
-  
-  return (
-    <div className="flex items-center gap-4 py-3 px-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
-       <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shrink-0 ${isReceived ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
-         {txn.recipient[0]}
-       </div>
-       <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-[0.95rem] text-[#1F1F1F] truncate">{txn.recipient}</h3>
-          <p className="text-xs text-gray-500 truncate mt-0.5">
-            {date.toLocaleDateString('en-IN', {day: 'numeric', month: 'long'})} • {date.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'})}
-          </p>
-       </div>
-       <div className="text-right">
-          <p className={`font-semibold text-[0.95rem] ${isReceived ? 'text-green-600' : 'text-[#1F1F1F]'}`}>
-            {isReceived ? '+' : '-'} ₹{txn.amount}
-          </p>
-          {txn.status === 'success' && (
-             <div className="flex items-center justify-end gap-1 mt-0.5">
-                <CheckCircle2 size={12} className="text-green-600 fill-green-100" />
-                <span className="text-[0.65rem] font-medium text-gray-500">Paid</span>
-             </div>
-          )}
-       </div>
-    </div>
-  )
 }
