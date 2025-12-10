@@ -15,7 +15,9 @@ import {
   BarChart3,
   Copy,
   QrCode,
-  Share2
+  Share2,
+  Building2,
+  Wallet
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -23,162 +25,179 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <div className="min-h-screen bg-white pb-20 font-sans text-[#202124]">
+    <div className="min-h-screen bg-white pb-24 font-sans text-[#202124] relative">
+      
+      {/* Background Pattern (Subtle GPay texture) */}
+      <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-[#F5F8FD] to-white z-0 pointer-events-none" />
+
       {/* Header Section */}
-      <div className="sticky top-0 z-10 bg-white">
-        {/* Top Bar with Search */}
-        <div className="px-4 py-3 flex items-center gap-3 shadow-sm">
-          <div className="flex-1 relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-              <Search size={20} />
+      <div className="sticky top-0 z-50 bg-[#F5F8FD]/95 backdrop-blur-sm transition-all">
+        <div className="px-4 py-3 flex items-center gap-4">
+            {/* Search Bar */}
+            <div className="flex-1 relative shadow-sm rounded-full">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                    <Search size={20} strokeWidth={2.5} />
+                </div>
+                <input
+                    type="text"
+                    placeholder="Pay friends and merchants"
+                    className="w-full bg-white border border-gray-200/80 rounded-full py-3 pl-12 pr-4 text-[0.95rem] font-medium text-gray-700 placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
             </div>
-            <input
-              type="text"
-              placeholder="Pay friends and merchants"
-              className="w-full bg-white border border-gray-300 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-gray-500 shadow-sm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="relative">
-            <div className="w-9 h-9 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity">
-              A
+
+            {/* Profile Avatar */}
+            <div className="relative shrink-0">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm cursor-pointer shadow-md ring-2 ring-white">
+                    A
+                </div>
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5">
-               <div className="bg-green-500 w-2.5 h-2.5 rounded-full border border-white"></div>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Main Content Scroll */}
-      <div className="pt-2">
+      {/* Main Content */}
+      <div className="relative z-10 pt-2 px-4 space-y-8">
         
-        {/* Hero / UPI ID Display */}
-        <div className="px-4 mb-6 relative">
-             <div className="bg-[#E8F0FE] rounded-2xl p-4 flex flex-col items-center justify-center relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-purple-500 to-red-400"></div>
-                <div className="flex items-center gap-2 mb-2">
-                    <QrCode size={48} className="text-[#1A73E8]" />
+        {/* UPI ID Banner */}
+        <div className="relative overflow-hidden">
+             {/* Background Art */}
+             <div className="bg-white rounded-[1.5rem] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100 relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-[url('https://www.gstatic.com/pay/invite/tez_logo.png')] bg-contain"></div>
+                
+                {/* Content */}
+                <div className="flex flex-col items-center justify-center pt-2">
+                    <div className="relative mb-3">
+                         <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+                         <QrCode size={42} className="text-[#1F1F1F] relative z-10" strokeWidth={1.5} />
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mb-4 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+                        <span className="text-[0.8rem] text-gray-600 font-medium tracking-wide">upi-id@oksbi</span>
+                        <Copy size={12} className="text-gray-400" />
+                    </div>
+
+                    <div className="flex w-full gap-3">
+                        <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#F8F9FA] rounded-xl text-[0.85rem] font-medium text-[#1F1F1F] hover:bg-gray-100 active:scale-95 transition-all">
+                            <Copy size={16} /> Copy UPI ID
+                        </button>
+                        <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#F8F9FA] rounded-xl text-[0.85rem] font-medium text-[#1F1F1F] hover:bg-gray-100 active:scale-95 transition-all">
+                            <Share2 size={16} /> Share QR
+                        </button>
+                    </div>
                 </div>
-                <p className="text-xs text-gray-600 font-medium mb-1">UPI ID: user@oksbi</p>
-                 <div className="flex gap-4 mt-2">
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full text-xs font-medium text-gray-700 shadow-sm border border-gray-200">
-                        <Copy size={12} /> Copy
-                    </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-full text-xs font-medium text-gray-700 shadow-sm border border-gray-200">
-                        <Share2 size={12} /> Share
-                    </button>
-                 </div>
              </div>
         </div>
 
         {/* Quick Actions Grid */}
-        <div className="px-4 mb-6">
-          <div className="grid grid-cols-4 gap-y-6 gap-x-2">
-            <QuickAction icon={<Scan size={24} />} label="Scan any QR code" color="text-blue-600" />
-            <QuickAction icon={<Users size={24} />} label="Pay contacts" color="text-blue-600" />
-            <QuickAction icon={<Smartphone size={24} />} label="Pay phone number" color="text-blue-600" />
-            <QuickAction icon={<Landmark size={24} />} label="Bank transfer" color="text-blue-600" />
-            <QuickAction icon={<AtSign size={24} />} label="Pay UPI ID or number" color="text-blue-600" />
-            <QuickAction icon={<User size={24} />} label="Self transfer" color="text-blue-600" />
-            <QuickAction icon={<Receipt size={24} />} label="Pay bills" color="text-blue-600" />
-            <QuickAction icon={<Zap size={24} />} label="Mobile recharge" color="text-blue-600" />
+        <div>
+          <div className="grid grid-cols-4 gap-y-7 gap-x-2">
+            <QuickAction icon={<Scan size={24} />} label="Scan any QR code" />
+            <QuickAction icon={<Users size={24} />} label="Pay contacts" />
+            <QuickAction icon={<Smartphone size={24} />} label="Pay phone number" />
+            <QuickAction icon={<Landmark size={24} />} label="Bank transfer" />
+            <QuickAction icon={<AtSign size={24} />} label="Pay UPI ID or number" />
+            <QuickAction icon={<User size={24} />} label="Self transfer" />
+            <QuickAction icon={<Receipt size={24} />} label="Pay bills" />
+            <QuickAction icon={<Zap size={24} />} label="Mobile recharge" />
           </div>
         </div>
 
         {/* People Section */}
-        <div className="mb-6">
-          <div className="px-4 mb-3 flex items-center justify-between">
-            <h2 className="text-[1.1rem] font-medium text-[#202124]">People</h2>
-            <button className="p-1.5 hover:bg-gray-100 rounded-full">
-                <MoreVertical size={20} className="text-gray-500" />
-            </button>
-          </div>
-          <div className="overflow-x-auto pb-4 px-4 scrollbar-hide flex gap-6">
-            <PersonItem name="Rahul" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul" />
-            <PersonItem name="Priya" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Priya" />
-            <PersonItem name="Amit" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Amit" />
-            <PersonItem name="Sneha" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Sneha" />
+        <div>
+          <SectionHeader title="People" />
+          <div className="grid grid-cols-4 gap-y-6 gap-x-2">
+            <PersonItem name="Rahul" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul" isRecent />
+            <PersonItem name="Priya" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Priya" isRecent />
+            <PersonItem name="Amit" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Amit" isRecent />
+            <PersonItem name="Sneha" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Sneha" isRecent />
             <PersonItem name="Vikram" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Vikram" />
             <PersonItem name="Anjali" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Anjali" />
             <PersonItem name="Rohit" avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Rohit" />
+            <div className="flex flex-col items-center gap-2 cursor-pointer group">
+                <div className="w-[58px] h-[58px] rounded-full flex items-center justify-center bg-white border border-gray-200 shadow-sm group-hover:bg-gray-50 transition-colors text-blue-600">
+                    <ChevronRight size={24} />
+                </div>
+                <span className="text-xs font-medium text-gray-700">More</span>
+            </div>
           </div>
         </div>
 
         {/* Businesses Section */}
-        <div className="mb-8">
-          <div className="px-4 mb-3 flex items-center justify-between">
-            <h2 className="text-[1.1rem] font-medium text-[#202124]">Businesses</h2>
-            <button className="px-3 py-1.5 bg-[#E8F0FE] text-[#1967D2] text-xs font-semibold rounded-full hover:bg-blue-100 transition-colors">
-              Explore
-            </button>
-          </div>
-          <div className="grid grid-cols-4 gap-y-6 gap-x-2 px-4">
-             <BusinessItem name="Jio" icon="J" color="bg-blue-600" />
-             <BusinessItem name="Zomato" icon="Z" color="bg-red-500" />
-             <BusinessItem name="Swiggy" icon="S" color="bg-orange-500" />
+        <div>
+          <SectionHeader title="Businesses" action="Explore" />
+          <div className="grid grid-cols-4 gap-y-6 gap-x-2">
+             <BusinessItem name="Jio" icon="J" color="bg-[#0f3cc9]" />
+             <BusinessItem name="Zomato" icon="Z" color="bg-[#cb202d]" />
+             <BusinessItem name="Swiggy" icon="S" color="bg-[#fc8019]" />
              <BusinessItem name="Uber" icon="U" color="bg-black" />
-             <BusinessItem name="Tata Sky" icon="T" color="bg-pink-600" />
-             <BusinessItem name="Bescom" icon="B" color="bg-green-600" />
+             <BusinessItem name="Tata Sky" icon="T" color="bg-[#e72c57]" />
+             <BusinessItem name="Bescom" icon="B" color="bg-[#2a9134]" />
+             <BusinessItem name="Flipkart" icon="F" color="bg-[#2874f0]" />
              <BusinessItem name="More" icon={<ChevronRight size={20} />} isMore />
           </div>
         </div>
 
         {/* Promotions Section */}
-        <div className="mb-8 px-4">
-           <h2 className="text-[1.1rem] font-medium text-[#202124] mb-4">Promotions</h2>
-           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-              <PromotionCard title="Rewards" icon="🎁" subtext="8 rewards" />
-              <PromotionCard title="Offers" icon="🏷️" subtext="See offers" />
-              <PromotionCard title="Referrals" icon="📣" subtext="₹201" />
-              <PromotionCard title="Indi-Home" icon="🏠" subtext="Play now" />
+        <div>
+           <SectionHeader title="Offers & rewards" />
+           <div className="grid grid-cols-4 gap-4">
+              <PromotionCard title="Rewards" icon="🎁" />
+              <PromotionCard title="Offers" icon="🏷️" />
+              <PromotionCard title="Referrals" icon="📣" />
+              <PromotionCard title="Indi-Home" icon="🏠" />
            </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="px-4 flex flex-col gap-1 pb-8">
-            <FooterAction icon={<BarChart3 size={20} />} label="Check your CIBIL score" />
-            <FooterAction icon={<History size={20} />} label="See transaction history" />
-            <FooterAction icon={<Landmark size={20} />} label="Check bank balance" />
+        {/* Footer Actions - Manage Money */}
+        <div className="pt-2 pb-12">
+            <h2 className="text-[1rem] font-medium text-[#202124] mb-4 px-1">Manage your money</h2>
+            <div className="flex flex-col gap-3">
+                <FooterAction icon={<BarChart3 size={22} />} label="Check your CIBIL score" sublabel="Free at no cost" />
+                <FooterAction icon={<History size={22} />} label="See transaction history" />
+                <FooterAction icon={<Landmark size={22} />} label="Check bank balance" />
+                <FooterAction icon={<Wallet size={22} />} label="Check wallet balance" />
+            </div>
         </div>
         
         {/* Branding Footer */}
-        <div className="flex flex-col items-center justify-center py-8 text-gray-400 gap-2">
+        <div className="flex flex-col items-center justify-center pb-24 text-gray-400 gap-2 opacity-60">
             <div className="flex items-center gap-1.5 text-xs font-medium tracking-wide">
-                 <span className="text-gray-500">Google</span> 
+                 <span className="text-gray-500 font-bold">Google</span> 
                  <span className="text-gray-400">Payment Partner</span>
             </div>
         </div>
 
       </div>
 
-      {/* Floating Action Button - Only shows when scrolling down usually, but sticky here for easy access */}
-      <div className="fixed bottom-6 right-6">
+      {/* Floating Action Button */}
+      <div className="fixed bottom-8 right-6 z-50">
         <motion.button 
           whileTap={{ scale: 0.95 }}
-          className="bg-white text-[#1A73E8] shadow-lg rounded-full px-5 py-3 flex items-center gap-2 font-medium border border-[#E8F0FE]"
+          className="bg-blue-600 text-white shadow-[0_6px_16px_rgba(26,115,232,0.3)] rounded-full px-6 py-3.5 flex items-center gap-2.5 font-medium hover:bg-blue-700 transition-colors"
         >
-          <span className="text-2xl font-light">+</span> New payment
+          <span className="text-2xl font-light leading-none mb-0.5">+</span> 
+          <span className="tracking-wide">New payment</span>
         </motion.button>
       </div>
     </div>
   );
 }
 
+// --- Components ---
+
 interface QuickActionProps {
   icon: React.ReactNode;
   label: string;
-  color: string;
 }
 
-function QuickAction({ icon, label, color }: QuickActionProps) {
+function QuickAction({ icon, label }: QuickActionProps) {
   return (
-    <div className="flex flex-col items-center gap-2 cursor-pointer group">
-      <div className={`w-12 h-12 rounded-full flex items-center justify-center bg-white shadow-sm border border-gray-100 group-hover:bg-gray-50 transition-colors ${color}`}>
+    <div className="flex flex-col items-center gap-2.5 cursor-pointer group">
+      <div className="w-12 h-12 rounded-full flex items-center justify-center text-blue-600 mb-1 transition-transform group-active:scale-95">
         {icon}
       </div>
-      <span className="text-[0.7rem] text-center text-gray-700 font-medium leading-tight max-w-[70px]">{label}</span>
+      <span className="text-[0.75rem] text-center text-[#1F1F1F] font-medium leading-tight max-w-[70px] -mt-2">{label}</span>
     </div>
   );
 }
@@ -186,15 +205,23 @@ function QuickAction({ icon, label, color }: QuickActionProps) {
 interface PersonItemProps {
   name: string;
   avatar: string;
+  isRecent?: boolean;
 }
 
-function PersonItem({ name, avatar }: PersonItemProps) {
+function PersonItem({ name, avatar, isRecent }: PersonItemProps) {
   return (
-    <div className="flex flex-col items-center gap-2 min-w-[64px] cursor-pointer">
-      <div className="w-14 h-14 rounded-full overflow-hidden border border-gray-100 shadow-sm">
-        <img src={avatar} alt={name} className="w-full h-full object-cover" />
+    <div className="flex flex-col items-center gap-2 cursor-pointer group">
+      <div className="relative">
+        <div className="w-[58px] h-[58px] rounded-full overflow-hidden border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.08)] group-hover:shadow-md transition-all">
+            <img src={avatar} alt={name} className="w-full h-full object-cover" />
+        </div>
+        {isRecent && (
+             <div className="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-[2px]">
+               <div className="bg-green-500 w-2.5 h-2.5 rounded-full border-[1.5px] border-white"></div>
+            </div>
+        )}
       </div>
-      <span className="text-xs text-gray-700 font-medium truncate w-full text-center">{name}</span>
+      <span className="text-[0.8rem] text-[#1F1F1F] font-medium truncate w-full text-center mt-0.5">{name}</span>
     </div>
   );
 }
@@ -209,10 +236,10 @@ interface BusinessItemProps {
 function BusinessItem({ name, icon, color, isMore }: BusinessItemProps) {
     return (
       <div className="flex flex-col items-center gap-2 cursor-pointer group">
-        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-sm ${isMore ? 'bg-white border border-gray-200 text-blue-600' : color}`}>
+        <div className={`w-[58px] h-[58px] rounded-full flex items-center justify-center text-white text-xl font-bold shadow-[0_1px_3px_rgba(0,0,0,0.08)] group-hover:shadow-md transition-all ${isMore ? 'bg-white border border-gray-200 text-blue-600' : color}`}>
           {icon}
         </div>
-        <span className="text-xs text-gray-700 font-medium truncate max-w-[64px] text-center">{name}</span>
+        <span className="text-[0.8rem] text-[#1F1F1F] font-medium truncate max-w-[64px] text-center mt-0.5">{name}</span>
       </div>
     );
 }
@@ -220,19 +247,15 @@ function BusinessItem({ name, icon, color, isMore }: BusinessItemProps) {
 interface PromotionCardProps {
   title: string;
   icon: string;
-  subtext?: string;
 }
 
-function PromotionCard({ title, icon, subtext }: PromotionCardProps) {
+function PromotionCard({ title, icon }: PromotionCardProps) {
     return (
-        <div className="min-w-[100px] flex flex-col items-center gap-1 cursor-pointer">
-            <div className="w-full aspect-square rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 flex flex-col items-center justify-center border border-gray-100 shadow-sm">
-                <span className="text-3xl mb-1">{icon}</span>
+        <div className="flex flex-col items-center gap-2 cursor-pointer group">
+            <div className="w-full aspect-square rounded-[1.2rem] bg-gradient-to-br from-[#E8F0FE] to-[#F8F9FA] flex flex-col items-center justify-center border border-blue-50/50 shadow-sm group-hover:shadow-md transition-all">
+                <span className="text-3xl filter drop-shadow-sm">{icon}</span>
             </div>
-            <div className="text-center">
-                 <span className="block text-xs font-semibold text-gray-800">{title}</span>
-                 {subtext && <span className="block text-[0.65rem] text-gray-500">{subtext}</span>}
-            </div>
+            <span className="text-[0.75rem] font-medium text-[#1F1F1F]">{title}</span>
         </div>
     )
 }
@@ -240,16 +263,33 @@ function PromotionCard({ title, icon, subtext }: PromotionCardProps) {
 interface FooterActionProps {
   icon: React.ReactNode;
   label: string;
+  sublabel?: string;
 }
 
-function FooterAction({ icon, label }: FooterActionProps) {
+function FooterAction({ icon, label, sublabel }: FooterActionProps) {
     return (
-        <div className="flex items-center gap-4 py-3.5 hover:bg-gray-50 rounded-lg px-2 -mx-2 cursor-pointer transition-colors">
-            <div className="text-[#1A73E8]">
+        <div className="flex items-center gap-4 py-3 px-1 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors group">
+            <div className="text-blue-600 bg-blue-50 p-2.5 rounded-full group-hover:bg-blue-100 transition-colors">
                 {icon}
             </div>
-            <span className="text-sm font-medium text-[#202124] flex-1">{label}</span>
-            <ChevronRight size={16} className="text-gray-400" />
+            <div className="flex-1">
+                <div className="text-[0.95rem] font-medium text-[#1F1F1F]">{label}</div>
+                {sublabel && <div className="text-xs text-green-600 mt-0.5 font-medium">{sublabel}</div>}
+            </div>
+            <ChevronRight size={20} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
+        </div>
+    )
+}
+
+function SectionHeader({ title, action }: { title: string, action?: string }) {
+    return (
+        <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-[1rem] font-medium text-[#202124]">{title}</h2>
+            {action && (
+                <button className="px-4 py-1.5 bg-[#E8F0FE] text-[#1967D2] text-[0.75rem] font-semibold rounded-full hover:bg-blue-100 transition-colors">
+                    {action}
+                </button>
+            )}
         </div>
     )
 }
