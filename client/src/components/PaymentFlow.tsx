@@ -97,9 +97,9 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
       className="fixed inset-0 h-[100dvh] w-screen bg-background z-[9999] flex flex-col text-foreground overscroll-none overflow-hidden touch-none"
     >
       {step === 'amount' && (
-        <div className="flex-1 bg-background relative flex flex-col h-full">
+        <div className="flex flex-col h-full relative overflow-y-auto">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 relative z-10 shrink-0">
+          <div className="flex items-center justify-between p-4 shrink-0">
             <button onClick={onClose} className="p-2 -ml-2 rounded-full hover:bg-muted/20 transition-colors">
               <X className="text-foreground" size={24} />
             </button>
@@ -113,45 +113,48 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
             </div>
           </div>
 
-          {/* Recipient Info - Compact & Centered */}
-          <div className="flex flex-col items-center pt-8 px-4 shrink-0 pointer-events-none select-none">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3 shadow-md">
-              {recipient.avatar || recipient.name[0]}
+          {/* Main Content Container - Top Aligned */}
+          <div className="flex flex-col items-center mt-4 w-full shrink-0">
+            {/* Recipient Info */}
+            <div className="flex flex-col items-center pointer-events-none select-none mb-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3 shadow-md">
+                {recipient.avatar || recipient.name[0]}
+              </div>
+              <h2 className="font-semibold text-foreground text-lg mb-1">Paying {recipient.name}</h2>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+                <ShieldCheck size={14} className="text-green-500 fill-current" />
+                <span className="font-medium">Banking name: {recipient.name}</span>
+              </div>
+              <p className="text-sm text-muted-foreground">{recipient.upiId}</p>
             </div>
-            <h2 className="font-semibold text-foreground text-lg mb-1">Paying {recipient.name}</h2>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-              <ShieldCheck size={14} className="text-green-500 fill-current" />
-              <span className="font-medium">Banking name: {recipient.name}</span>
-            </div>
-            <p className="text-sm text-muted-foreground">{recipient.upiId}</p>
-          </div>
 
-          {/* Amount Input Section - Vertically Centered */}
-          <div className="flex-1 flex flex-col items-center pt-12 text-center">
-            <div className="flex items-center justify-center w-full mb-6 relative px-8">
-              <span className={`font-normal text-foreground transition-all duration-200 ${amount ? 'text-5xl translate-y-[-4px]' : 'text-4xl text-muted-foreground'}`}>
-                ₹
-              </span>
-              <input
-                autoFocus
-                type="tel"
-                inputMode="decimal"
-                pattern="[0-9]*"
-                value={amount}
-                placeholder="0"
-                onChange={(e) => {
-                  if (/^\d*\.?\d*$/.test(e.target.value)) {
-                    setAmount(e.target.value);
-                  }
-                }}
-                className="font-normal text-foreground bg-transparent text-left focus:outline-none placeholder:text-muted-foreground/30 ml-1 transition-all duration-200"
-                style={{
-                  fontSize: amount ? '5rem' : '4rem',
-                  caretColor: 'currentColor',
-                  width: amount ? `${amount.length + 0.5}ch` : '1.5ch',
-                  maxWidth: '100%'
-                }}
-              />
+            {/* Amount Input */}
+            <div className="flex flex-col items-center justify-center mb-6 w-full">
+              <div className="flex items-center justify-center w-full relative px-8">
+                <span className={`font-normal text-foreground transition-all duration-200 ${amount ? 'text-5xl translate-y-[-4px]' : 'text-4xl text-muted-foreground'}`}>
+                  ₹
+                </span>
+                <input
+                  autoFocus
+                  type="tel"
+                  inputMode="decimal"
+                  pattern="[0-9]*"
+                  value={amount}
+                  placeholder="0"
+                  onChange={(e) => {
+                    if (/^\d*\.?\d*$/.test(e.target.value)) {
+                      setAmount(e.target.value);
+                    }
+                  }}
+                  className="font-normal text-foreground bg-transparent text-left focus:outline-none placeholder:text-muted-foreground/30 ml-1 transition-all duration-200"
+                  style={{
+                    fontSize: amount ? '5rem' : '4rem',
+                    caretColor: 'currentColor',
+                    width: amount ? `${amount.length + 0.5}ch` : '1.5ch',
+                    maxWidth: '100%'
+                  }}
+                />
+              </div>
             </div>
 
             {/* Note Pill */}
