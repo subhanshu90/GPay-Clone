@@ -3,7 +3,6 @@ const CACHE_NAME = 'geepay-v1';
 const urlsToCache = [
     '/',
     '/index.html',
-    '/payment-success.mp3',
     '/icon-192.png',
     '/icon-512.png'
 ];

@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { MOCK_USER, generateTransactionId, generateBankRefId, type Transaction } from "../lib/mockData";
 
+
 interface PaymentFlowProps {
   recipient: { name: string; upiId: string; avatar?: string };
   onClose: () => void;
@@ -64,19 +65,18 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
     setCurrentTxn(newTxn);
     setStep('success');
 
-    // Play success sound (temporarily disabled - add payment-success.mp3 to client/public/)
-    // try {
-    //   const audio = new Audio('/payment-success.mp3');
-    //   audio.volume = 0.5;
-    //   await audio.play();
-    // } catch (error) {
-    //   console.log('Audio playback failed (autoplay policy):', error);
-    // }
+    // Play success sound using imported file
+    try {
+      const audio = new Audio("/payment-success.mp3");
+      audio.volume = 0.5;
+      await audio.play();
+      console.log('✓ Payment sound played successfully!');
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+      // Browser may block autoplay - this is normal
+    }
 
-    // Wait for success animation
-    setTimeout(() => {
-      onSuccess(newTxn);
-    }, 1500);
+    // Don't call onSuccess here - only when Done button is clicked
   };
 
   return (
@@ -248,36 +248,56 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
       )}
 
       {step === 'success' && currentTxn && (
-        <div className="flex-1 flex flex-col items-center justify-center bg-white relative overflow-hidden">
-          {/* Audio sound effect visualization */}
-          <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+        <div className="flex-1 flex flex-col bg-[#0A0A0A] text-white">
+          {/* Success Content */}
+          <div className="flex-1 flex flex-col items-center justify-center px-6">
+            {/* Blue Check Icon */}
             <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 3, opacity: 0 }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-              className="w-64 h-64 bg-blue-50 rounded-full"
-            />
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center mb-8"
+            >
+              <Check size={48} strokeWidth={3} className="text-white" />
+            </motion.div>
+
+            {/* Amount */}
+            <h2 className="text-4xl font-medium mb-6">₹{currentTxn.amount.toFixed(2)}</h2>
+
+            {/* Payment Details */}
+            <div className="text-center space-y-1 mb-8">
+              <p className="text-gray-400 text-sm">Paid to</p>
+              <p className="text-white text-lg font-medium">{currentTxn.recipient}</p>
+              <p className="text-gray-400 text-sm">{currentTxn.recipientUpi}</p>
+              <p className="text-gray-500 text-xs mt-2">
+                {new Date(currentTxn.date).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true
+                })}
+              </p>
+            </div>
           </div>
 
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white mb-6 shadow-xl relative z-10"
-          >
-            <Check size={40} strokeWidth={4} />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-center z-10"
-          >
-            <h2 className="text-3xl font-medium text-gray-900 mb-1">₹{amount}</h2>
-            <div className="flex items-center justify-center gap-1.5 text-gray-600 mt-2">
-              <span className="text-sm">Paid to {recipient.name}</span>
-            </div>
-          </motion.div>
+          {/* Bottom Actions */}
+          <div className="p-4 pb-6 space-y-3">
+            <button
+              onClick={() => {
+                onSuccess(currentTxn);
+                onClose();
+              }}
+              className="w-full bg-blue-600 text-white font-medium py-3.5 rounded-full transition-all active:scale-[0.98]"
+            >
+              Done
+            </button>
+            <button className="w-full border border-gray-800 text-gray-300 font-medium py-3.5 rounded-full transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+              <Share2 size={18} />
+              Share screenshot
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -7,21 +7,13 @@ export default function Money() {
 
     return (
         <div className="min-h-screen bg-[#0A0A0A] text-white pb-24">
-            {/* Decorative Header */}
-            <div className="relative h-48 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-[#0A0A0A]">
-                    {/* Illustration placeholder */}
-                    <div className="absolute bottom-0 right-0 w-48 h-48">
-                        <div className="text-6xl opacity-40">💰</div>
-                    </div>
-                </div>
-                <div className="relative z-10 p-6">
-                    <h1 className="text-3xl font-bold">Money</h1>
-                </div>
+            {/* Simple Header */}
+            <div className="px-4 pt-4 pb-3">
+                <h1 className="text-lg font-semibold text-white">Money</h1>
             </div>
 
             {/* Content */}
-            <div className="px-4 -mt-8 space-y-4">
+            <div className="px-4 space-y-4">
                 {/* Bank Balances Card */}
                 <motion.div
                     whileTap={{ scale: 0.98 }}

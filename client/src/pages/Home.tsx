@@ -187,24 +187,25 @@ export default function Home() {
           <h2 className="text-base font-semibold text-white mb-4 px-1">People</h2>
           <div className="grid grid-cols-4 gap-y-5 gap-x-2">
             <PersonItem
-              name="Sushil ban..."
-              avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Sushil"
-              onClick={() => setActivePayment({ name: "Sushil Bandra", upiId: "sushil@oksbi", avatar: "S" })}
+              name="Luke Skywalker"
+              avatar="L"
+              color="bg-blue-600"
+              onClick={() => setActivePayment({ name: "Luke Skywalker", upiId: "luke@jedi", avatar: "L" })}
             />
             <PersonItem
-              name="Alok"
-              avatar="A"
+              name="Princess Leia"
+              avatar="L"
               color="bg-purple-600"
-              onClick={() => setActivePayment({ name: "Alok Sharma", upiId: "alok@paytm", avatar: "A" })}
+              onClick={() => setActivePayment({ name: "Princess Leia", upiId: "leia@rebellion", avatar: "L" })}
             />
             <PersonItem
-              name="SHASHAN..."
-              avatar="S"
+              name="Han Solo"
+              avatar="H"
               color="bg-orange-600"
             />
             <PersonItem
-              name="Birthday gift"
-              avatar="B"
+              name="Rebels Group"
+              avatar="R"
               color="bg-gray-700"
               isGroup
             />
@@ -214,14 +215,14 @@ export default function Home() {
               color="bg-gray-800"
             />
             <PersonItem
-              name="Venkatesh.M"
-              avatar="V"
-              color="bg-purple-700"
+              name="Yoda"
+              avatar="Y"
+              color="bg-green-700"
               hasNotification
             />
             <PersonItem
-              name="REVAN UD..."
-              avatar="R"
+              name="Obi-Wan K..."
+              avatar="O"
               color="bg-teal-600"
               hasNotification
             />

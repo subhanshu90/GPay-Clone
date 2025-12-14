@@ -18,13 +18,15 @@ export interface BankAccount {
 }
 
 export const MOCK_USER = {
-  name: "Arjun Kumar",
-  upiId: "arjun.kumar@oksbi",
-  avatar: "A",
+  id: "user1",
+  name: "Darth Vader",
+  avatar: "D",
+  upiId: "darthvader@paytm",
+  phoneNumber: "9876543210",
   bankAccount: {
     bankName: "State Bank of India",
-    accountNumber: "XXXX8932",
-    ifsc: "SBIN0004321",
+    accountNumber: "1234567890",
+    ifsc: "SBIN0001234",
     balance: 24500.50,
     type: "savings"
   } as BankAccount
