@@ -89,10 +89,10 @@
 
 /* Light Theme */
 [data-theme="light"] {
-  --background: 0 0% 100%; /* White */
+  --background: 210 20% 98%; /* Light gray background #F8F9FA */
   --foreground: 220 13% 13%; /* #202124 */
 
-  --card: 0 0% 100%;
+  --card: 0 0% 100%; /* White cards */
   --card-foreground: 220 13% 13%;
 
   --popover: 0 0% 100%;

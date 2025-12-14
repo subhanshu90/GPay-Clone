@@ -224,12 +224,14 @@ export default function Home() {
               name="Rebels Group"
               avatar="R"
               color="bg-secondary"
+              textColor="text-foreground"
               isGroup
             />
             <PersonItem
               name="Self transfer"
               avatar={<User size={24} />}
               color="bg-secondary"
+              textColor="text-blue-600"
             />
             <PersonItem
               name="Yoda"
@@ -378,16 +380,19 @@ interface PersonItemProps {
   avatar: React.ReactNode | string;
   onClick?: () => void;
   color?: string;
+  textColor?: string;
   hasNotification?: boolean;
   isGroup?: boolean;
 }
 
-function PersonItem({ name, avatar, onClick, color, hasNotification, isGroup }: PersonItemProps) {
+function PersonItem({ name, avatar, onClick, color, textColor, hasNotification, isGroup }: PersonItemProps) {
   const bgColor = color || 'bg-blue-600';
+  const txtColor = textColor || 'text-white';
+
   return (
     <div onClick={onClick} className="flex flex-col items-center gap-2 cursor-pointer group">
       <div className="relative">
-        <div className={`w-14 h-14 rounded-full ${bgColor} flex items-center justify-center text-white text-lg font-semibold overflow-hidden group-hover:scale-105 transition-transform border border-transparent dark:border-white/10`}>
+        <div className={`w-14 h-14 rounded-full ${bgColor} flex items-center justify-center ${txtColor} text-lg font-semibold overflow-hidden group-hover:scale-105 transition-transform border border-transparent dark:border-white/10`}>
           {typeof avatar === 'string' && avatar.startsWith('http') ? (
             <img src={avatar} alt={name} className="w-full h-full object-cover" />
           ) : typeof avatar === 'string' ? (
