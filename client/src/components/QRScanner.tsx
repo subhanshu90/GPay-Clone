@@ -35,15 +35,20 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
           (decodedText) => {
             // Successfully scanned
             if (!isScanning.current) return;
-            
+
             console.log("QR Code scanned:", decodedText);
-            
+
             // Parse UPI URL
             if (decodedText.startsWith("upi://")) {
               isScanning.current = false;
-              scanner?.stop().then(() => {
+              // Stop scanner before calling onScan
+              if (scanner && scanner.isScanning) {
+                scanner.stop().then(() => {
+                  onScan(decodedText);
+                }).catch(err => console.log("Stop error:", err));
+              } else {
                 onScan(decodedText);
-              });
+              }
             } else {
               setError("Invalid QR code. Please scan a UPI payment QR code.");
               setTimeout(() => setError(null), 3000);
@@ -59,7 +64,7 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
         setScanning(true);
       } catch (err: any) {
         console.error("Error starting scanner:", err);
-        
+
         if (err.name === "NotAllowedError" || err.message?.includes("permission")) {
           setPermissionDenied(true);
           setError("Camera permission denied. Please allow camera access to scan QR codes.");
@@ -78,7 +83,12 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
     return () => {
       isScanning.current = false;
       if (scannerRef.current) {
-        scannerRef.current.stop().catch(console.error);
+        // Check if scanner is actually running before stopping
+        if (scannerRef.current.isScanning) {
+          scannerRef.current.stop()
+            .catch(err => console.log("Cleanup stop error:", err));
+        }
+        scannerRef.current = null;
       }
     };
   }, [onScan]);
@@ -98,42 +108,87 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black text-white">
+      {/* Top Bar */}
       <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-10">
-        <button onClick={handleClose} className="p-2 bg-black/40 rounded-full backdrop-blur-md">
-          <ArrowLeft size={24} />
+        <button onClick={handleClose} className="p-2">
+          <X size={28} className="text-white" strokeWidth={2.5} />
         </button>
         <div className="flex gap-4">
-          <button className="p-2 bg-black/40 rounded-full backdrop-blur-md">
-            <Zap size={24} />
+          <button className="p-2">
+            <Zap size={24} className="text-white" />
           </button>
-          <button onClick={handleClose} className="p-2 bg-black/40 rounded-full backdrop-blur-md">
-            <X size={24} />
+          <button className="p-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="4" y="4" width="7" height="7" />
+              <rect x="13" y="4" width="7" height="7" />
+              <rect x="4" y="13" width="7" height="7" />
+              <rect x="13" y="13" width="7" height="7" />
+            </svg>
+          </button>
+          <button className="p-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="5" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="12" cy="19" r="2" />
+            </svg>
           </button>
         </div>
       </div>
 
+      {/* Scanner Area */}
       <div className="h-full w-full relative flex flex-col items-center justify-center">
-        {/* Camera Feed */}
-        <div id="qr-reader" className="w-full max-w-md" />
+        {/* Scanning Frame with Colorful Corners */}
+        <div className="relative w-[280px] h-[280px] mb-8">
+          {/* Camera Feed */}
+          <div id="qr-reader" className="absolute inset-0 overflow-hidden rounded-3xl" />
+
+          {/* Corner Brackets */}
+          {/* Top Left - Red */}
+          <div className="absolute top-0 left-0 w-16 h-16">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full" />
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-red-500 to-pink-500 rounded-full" />
+          </div>
+
+          {/* Top Right - Orange */}
+          <div className="absolute top-0 right-0 w-16 h-16">
+            <div className="absolute top-0 right-0 w-full h-1.5 bg-gradient-to-l from-orange-500 to-yellow-500 rounded-full" />
+            <div className="absolute top-0 right-0 w-1.5 h-full bg-gradient-to-b from-orange-500 to-yellow-500 rounded-full" />
+          </div>
+
+          {/* Bottom Left - Blue */}
+          <div className="absolute bottom-0 left-0 w-16 h-16">
+            <div className="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" />
+            <div className="absolute bottom-0 left-0 w-1.5 h-full bg-gradient-to-t from-blue-500 to-cyan-500 rounded-full" />
+          </div>
+
+          {/* Bottom Right - Green */}
+          <div className="absolute bottom-0 right-0 w-16 h-16">
+            <div className="absolute bottom-0 right-0 w-full h-1.5 bg-gradient-to-l from-green-500 to-emerald-500 rounded-full" />
+            <div className="absolute bottom-0 right-0 w-1.5 h-full bg-gradient-to-t from-green-500 to-emerald-500 rounded-full" />
+          </div>
+        </div>
 
         {/* Error Message */}
         {error && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute top-20 left-4 right-4 bg-red-500/90 backdrop-blur-md text-white px-4 py-3 rounded-lg flex items-center gap-3"
+            className="absolute top-24 left-4 right-4 bg-red-500/90 backdrop-blur-md text-white px-4 py-3 rounded-lg flex items-center gap-3"
           >
             <AlertCircle size={20} />
             <p className="text-sm font-medium flex-1">{error}</p>
           </motion.div>
         )}
 
-        {/* Instructions */}
-        {scanning && !error && (
-          <p className="mt-8 text-sm font-medium text-white/80 bg-black/40 px-4 py-2 rounded-full backdrop-blur-md absolute bottom-32">
-            Align QR code within the frame to scan
-          </p>
-        )}
+        {/* Upload from Gallery Button */}
+        <button className="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-full flex items-center gap-2 font-medium mb-8">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+          Upload from gallery
+        </button>
 
         {/* Permission Denied State */}
         {permissionDenied && (
@@ -151,12 +206,22 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
             </button>
           </div>
         )}
+      </div>
 
-        {/* Bottom Instructions */}
-        <div className="absolute bottom-12 w-full px-8 text-center">
-          <p className="text-xs text-white/60 mb-4">
-            Point your camera at a UPI QR code to scan
-          </p>
+      {/* Bottom Feedback Section */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent">
+        <div className="border-t border-white/10 rounded-t-3xl bg-gray-900/80 backdrop-blur-md p-6 pb-8">
+          <div className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4" />
+          <p className="text-center text-white/90 font-medium mb-2">Is the QR not working?</p>
+          <p className="text-center text-white/60 text-sm mb-4">Send feedback to us</p>
+          <div className="flex gap-3">
+            <button className="flex-1 bg-white/10 text-white py-3 rounded-full font-medium border border-white/20">
+              Not now
+            </button>
+            <button className="flex-1 bg-blue-500 text-white py-3 rounded-full font-medium">
+              Send feedback
+            </button>
+          </div>
         </div>
       </div>
     </div>
