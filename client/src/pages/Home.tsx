@@ -18,6 +18,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import PaymentFlow from "@/components/PaymentFlow";
 import QRScanner from "@/components/QRScanner";
+import PayBySearch from "@/components/PayBySearch";
 import TransactionHistory from "@/components/TransactionHistory";
 import TransactionDetail from "@/components/TransactionDetail";
 import { MOCK_TRANSACTIONS, MOCK_USER, type Transaction } from "@/lib/mockData";
@@ -26,6 +27,7 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [showScanner, setShowScanner] = useState(false);
+  const [showPayBySearch, setShowPayBySearch] = useState(false);
   const [activePayment, setActivePayment] = useState<{ name: string, upiId: string, avatar?: string } | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
   const [showHistory, setShowHistory] = useState(false);
@@ -55,6 +57,19 @@ export default function Home() {
           <QRScanner
             onClose={() => setShowScanner(false)}
             onScan={handleScanSuccess}
+          />
+        )}
+        {showPayBySearch && (
+          <PayBySearch
+            onClose={() => setShowPayBySearch(false)}
+            onSelectRecipient={(contact) => {
+              setShowPayBySearch(false);
+              setActivePayment({
+                name: contact.name,
+                upiId: contact.upiId,
+                avatar: contact.avatar || contact.name[0]
+              });
+            }}
           />
         )}
         {activePayment && (
@@ -138,7 +153,7 @@ export default function Home() {
             <ActionButton
               icon={<Users size={24} />}
               label="Pay anyone"
-              onClick={() => setActivePayment({ name: "Select Contact", upiId: "contact@upi" })}
+              onClick={() => setShowPayBySearch(true)}
             />
             <ActionButton
               icon={<Landmark size={24} />}
