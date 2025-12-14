@@ -6,11 +6,11 @@ export default function Bills() {
     const [, setLocation] = useLocation();
 
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-white pb-24">
+        <div className="min-h-screen bg-background text-foreground pb-24">
             {/* Header */}
             <div className="px-4 pt-4 pb-2">
                 <h1 className="text-2xl font-bold">Bills & recharges</h1>
-                <button className="text-sm text-gray-400 flex items-center gap-1 mt-1">
+                <button className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                     Manage
                     <ChevronRight size={14} />
                 </button>
@@ -35,7 +35,7 @@ export default function Bills() {
 
                 {/* Businesses */}
                 <div>
-                    <h2 className="text-base font-semibold text-white mb-4 px-1">Businesses</h2>
+                    <h2 className="text-base font-semibold text-foreground mb-4 px-1">Businesses</h2>
                     <div className="grid grid-cols-4 gap-y-5 gap-x-2">
                         <BusinessItem name="SHAHIDALI..." color="bg-orange-600" initial="S" />
                         <BusinessItem name="Muhamma..." color="bg-teal-600" initial="M" />
@@ -46,7 +46,7 @@ export default function Bills() {
 
                 {/* Gift Cards & More */}
                 <div>
-                    <h2 className="text-base font-semibold text-white mb-4 px-1">Gift cards & more</h2>
+                    <h2 className="text-base font-semibold text-foreground mb-4 px-1">Gift cards & more</h2>
                     <div className="grid grid-cols-2 gap-3">
                         <GiftCard
                             icon="📱"
@@ -63,7 +63,7 @@ export default function Bills() {
             </div>
 
             {/* Bottom Navigation */}
-            <div className="fixed bottom-0 left-0 w-full bg-[#0A0A0A] border-t border-gray-900 py-2 px-6 flex justify-around items-center z-50">
+            <div className="fixed bottom-0 left-0 w-full bg-background border-t border-border py-2 px-6 flex justify-around items-center z-50">
                 <NavItem
                     icon={<HomeIcon size={24} />}
                     label="Home"
@@ -90,10 +90,10 @@ export default function Bills() {
 function NavItem({ icon, label, isActive, onClick }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void }) {
     return (
         <button onClick={onClick} className="flex flex-col items-center gap-0.5 min-w-16 py-1.5">
-            <div className={`transition-colors ${isActive ? 'text-blue-500' : 'text-gray-500'}`}>
+            <div className={`transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                 {icon}
             </div>
-            {isActive && <span className="text-[10px] font-medium text-blue-500">{label}</span>}
+            {isActive && <span className="text-[10px] font-medium text-primary">{label}</span>}
         </button>
     );
 }
@@ -111,7 +111,7 @@ function ServiceItem({ name, color, icon, badge, badgeColor }: { name: string; c
                     </div>
                 )}
             </div>
-            <span className="text-[0.7rem] text-gray-300 font-medium text-center leading-tight">{name}</span>
+            <span className="text-[0.7rem] text-muted-foreground font-medium text-center leading-tight">{name}</span>
         </div>
     );
 }
@@ -125,7 +125,7 @@ function UtilityButton({ icon, label }: { icon: string; label: string }) {
             <div className="w-full aspect-square bg-blue-700 hover:bg-blue-600 rounded-2xl flex items-center justify-center text-2xl transition-colors">
                 {icon}
             </div>
-            <span className="text-[0.7rem] text-center text-gray-300 font-medium leading-tight">{label}</span>
+            <span className="text-[0.7rem] text-center text-muted-foreground font-medium leading-tight">{label}</span>
         </motion.div>
     );
 }
@@ -136,7 +136,7 @@ function BusinessItem({ name, color, initial }: { name: string; color: string; i
             <div className={`w-14 h-14 ${color} rounded-full flex items-center justify-center text-white text-xl font-bold`}>
                 {initial}
             </div>
-            <span className="text-[0.7rem] text-gray-300 font-medium text-center">{name}</span>
+            <span className="text-[0.7rem] text-muted-foreground font-medium text-center">{name}</span>
         </div>
     );
 }
@@ -144,10 +144,10 @@ function BusinessItem({ name, color, initial }: { name: string; color: string; i
 function MoreButton({ label }: { label: string }) {
     return (
         <div className="flex flex-col items-center gap-2 cursor-pointer">
-            <div className="w-14 h-14 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center text-gray-400">
+            <div className="w-14 h-14 rounded-full bg-secondary border-2 border-border flex items-center justify-center text-muted-foreground">
                 <ChevronRight size={24} />
             </div>
-            <span className="text-[0.7rem] text-gray-300 font-medium">{label}</span>
+            <span className="text-[0.7rem] text-muted-foreground font-medium">{label}</span>
         </div>
     );
 }
@@ -156,11 +156,11 @@ function GiftCard({ icon, title, description }: { icon: string; title: string; d
     return (
         <motion.div
             whileTap={{ scale: 0.98 }}
-            className="bg-[#1C1C1C] rounded-2xl p-4 cursor-pointer"
+            className="bg-card rounded-2xl p-4 cursor-pointer border border-border"
         >
             <div className="text-3xl mb-2">{icon}</div>
-            <h3 className="font-semibold text-white mb-1 text-sm">{title}</h3>
-            <p className="text-xs text-gray-400">{description}</p>
+            <h3 className="font-semibold text-foreground mb-1 text-sm">{title}</h3>
+            <p className="text-xs text-muted-foreground">{description}</p>
             <div className="flex gap-1 mt-3">
                 <div className="w-5 h-5 bg-blue-600 rounded-full" />
                 <div className="w-5 h-5 bg-purple-600 rounded-full -ml-2" />

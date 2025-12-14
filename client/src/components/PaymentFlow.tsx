@@ -8,7 +8,8 @@ import {
   HelpCircle,
   ChevronRight,
   MoreVertical,
-  RotateCcw
+  X,
+  AlertCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MOCK_USER, generateTransactionId, generateBankRefId, type Transaction } from "../lib/mockData";
@@ -85,31 +86,42 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-white z-[9999] flex flex-col"
+      className="fixed inset-0 bg-background z-[9999] flex flex-col text-foreground"
     >
       {step === 'amount' && (
-        <div className="flex-1 bg-white relative flex flex-col h-full">
+        <div className="flex-1 bg-background relative flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 relative z-10">
-            <button onClick={onClose} className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
-              <ArrowLeft className="text-gray-800" size={24} />
+            <button onClick={onClose} className="p-2 -ml-2">
+              <X className="text-foreground" size={24} />
             </button>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold mb-1 shadow-sm">
-                {recipient.avatar || recipient.name[0]}
-              </div>
-              <h2 className="font-semibold text-gray-900 text-sm">Paying {recipient.name}</h2>
-              <p className="text-xs text-gray-500">{recipient.upiId}</p>
+            <div className="flex gap-2">
+              <button className="p-2 -mr-2">
+                <AlertCircle className="text-foreground" size={24} />
+              </button>
+              <button className="p-2 -mr-2">
+                <MoreVertical className="text-foreground" size={24} />
+              </button>
             </div>
-            <button className="p-2 -mr-2 rounded-full hover:bg-gray-100 transition-colors">
-              <MoreVertical className="text-gray-800" size={24} />
-            </button>
+          </div>
+
+          {/* Recipient Info */}
+          <div className="flex flex-col items-center mt-4 px-4">
+            <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-3 shadow-lg">
+              {recipient.avatar || recipient.name[0]}
+            </div>
+            <h2 className="font-medium text-foreground text-base mb-1">Paying {recipient.name}</h2>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+              <ShieldCheck size={12} className="text-green-500" />
+              <span>Banking name: {recipient.name}</span>
+            </div>
+            <p className="text-xs text-muted-foreground">{recipient.upiId?.split('@')[1]} • {recipient.upiId}</p>
           </div>
 
           {/* Amount Input */}
-          <div className="flex-1 flex flex-col items-center justify-center -mt-10">
-            <div className="flex items-center justify-center w-full px-8 mb-6">
-              <span className="text-4xl font-semibold text-gray-900 mr-1">₹</span>
+          <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-4">
+            <div className="flex items-center justify-center w-full mb-6">
+              <span className="text-6xl font-light text-foreground mr-3">₹</span>
               <input
                 autoFocus
                 type="tel"
@@ -118,58 +130,34 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
                 value={amount}
                 placeholder="0"
                 onChange={(e) => {
-                  // Allow only numbers and decimal point
                   if (/^\d*\.?\d*$/.test(e.target.value)) {
                     setAmount(e.target.value);
                   }
                 }}
-                className="text-6xl font-semibold text-gray-900 bg-transparent text-center w-full focus:outline-none placeholder:text-gray-300"
+                className="text-8xl font-light text-foreground bg-transparent text-center focus:outline-none placeholder:text-muted-foreground w-auto"
+                style={{ caretColor: 'currentColor', minWidth: '120px' }}
               />
             </div>
 
-            {/* Note Input */}
-            <div className="w-64 px-4 py-3 bg-gray-100 rounded-full flex items-center justify-center transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-500 border border-transparent focus-within:border-blue-500">
-              <input
-                type="text"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Add a note"
-                className="bg-transparent text-center w-full text-base text-gray-900 placeholder:text-gray-500 focus:outline-none font-medium"
-              />
-            </div>
-          </div>
-
-          {/* Bottom Action Area */}
-          <div className="p-4 pb-12 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-            {amount && (
-              <div className="flex items-center justify-between mb-4 px-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center border border-blue-200">
-                    <span className="text-blue-700 font-bold text-xs">
-                      {MOCK_USER.bankAccount.bankName.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-gray-900">{MOCK_USER.bankAccount.bankName} •••• {MOCK_USER.bankAccount.accountNumber.slice(-4)}</span>
-                    <span className="text-[10px] text-gray-500">Savings Account</span>
-                  </div>
-                </div>
-                <ChevronDown size={16} className="text-gray-400" />
-              </div>
-            )}
-
-            <button
-              disabled={!amount}
-              onClick={() => setStep('pin')}
-              className="w-full bg-blue-600 text-white font-medium py-4 rounded-full shadow-lg shadow-blue-200 disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98] text-lg"
-            >
-              Pay ₹{amount || '0'}
+            {/* Note Button */}
+            <button className="px-8 py-3 bg-secondary text-secondary-foreground rounded-full text-sm font-medium hover:bg-secondary/80 transition-colors border border-border">
+              Add note
             </button>
-
-            <div className="flex justify-center mt-4">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" className="h-4 opacity-60" alt="UPI" />
-            </div>
           </div>
+
+          {/* Next Button - Floating */}
+          {amount && (
+            <div className="fixed bottom-28 right-6 z-50">
+              <button
+                onClick={() => setStep('pin')}
+                className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center shadow-2xl hover:bg-blue-600 transition-all active:scale-95"
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -187,7 +175,7 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
           <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <div>
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">TO</p>
-              <p className="text-sm font-semibold text-gray-800">{recipient.name}</p>
+              <p className="text-sm font-semibold text-gray-900">{recipient.name}</p>
               <p className="text-xs text-gray-500">{recipient.upiId}</p>
             </div>
             <div className="text-right">
@@ -211,7 +199,7 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
                     value={digit}
                     onChange={(e) => handlePinChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
-                    className="w-10 h-10 border-b-2 border-gray-300 text-center text-2xl text-gray-800 focus:border-[#1A73E8] transition-colors outline-none bg-transparent font-bold"
+                    className="w-10 h-10 border-b-2 border-gray-300 text-center text-2xl text-gray-900 focus:border-[#1A73E8] transition-colors outline-none bg-transparent font-bold"
                   />
                   {/* Dot mask for entered PIN */}
                   {digit && (
@@ -263,9 +251,9 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
       )}
 
       {step === 'processing' && (
-        <div className="flex-1 flex flex-col items-center justify-center bg-white">
-          <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-blue-600 animate-spin mb-6"></div>
-          <h3 className="text-lg font-medium text-gray-900">Processing payment...</h3>
+        <div className="flex-1 flex flex-col items-center justify-center bg-background">
+          <div className="w-16 h-16 rounded-full border-4 border-muted border-t-blue-600 animate-spin mb-6"></div>
+          <h3 className="text-lg font-medium text-foreground">Processing payment...</h3>
         </div>
       )}
 
@@ -273,7 +261,7 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex-1 flex flex-col bg-[#0A0A0A] text-white"
+          className="flex-1 flex flex-col bg-background text-foreground"
         >
           {/* Success Content */}
           <div className="flex-1 flex flex-col items-center justify-center px-6">
@@ -292,10 +280,10 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
 
             {/* Payment Details */}
             <div className="text-center space-y-1 mb-8">
-              <p className="text-gray-400 text-sm">Paid to</p>
-              <p className="text-white text-lg font-medium">{currentTxn.recipient}</p>
-              <p className="text-gray-400 text-sm">{currentTxn.recipientUpi}</p>
-              <p className="text-gray-500 text-xs mt-2">
+              <p className="text-muted-foreground text-sm">Paid to</p>
+              <p className="text-foreground text-lg font-medium">{currentTxn.recipient}</p>
+              <p className="text-muted-foreground text-sm">{currentTxn.recipientUpi}</p>
+              <p className="text-muted-foreground text-xs mt-2">
                 {new Date(currentTxn.date).toLocaleDateString('en-IN', {
                   day: 'numeric',
                   month: 'long',
@@ -319,7 +307,7 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
             >
               Done
             </button>
-            <button className="w-full border border-gray-800 text-gray-300 font-medium py-3.5 rounded-full transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+            <button className="w-full border border-border text-foreground font-medium py-3.5 rounded-full transition-all active:scale-[0.98] flex items-center justify-center gap-2">
               <Share2 size={18} />
               Share screenshot
             </button>

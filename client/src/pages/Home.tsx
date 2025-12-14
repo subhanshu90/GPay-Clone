@@ -13,7 +13,15 @@ import {
   Lightbulb,
   Zap,
   Plus,
-  User
+  User,
+  CreditCard,
+  Tv,
+  Car,
+  FileText,
+  Coins,
+  Gauge,
+  History,
+  ChevronRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import PaymentFlow from "@/components/PaymentFlow";
@@ -23,13 +31,18 @@ import TransactionHistory from "@/components/TransactionHistory";
 import TransactionDetail from "@/components/TransactionDetail";
 import { MOCK_TRANSACTIONS, MOCK_USER, type Transaction } from "@/lib/mockData";
 
+import { useTransactions } from "@/context/TransactionContext";
+
 export default function Home() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [showScanner, setShowScanner] = useState(false);
   const [showPayBySearch, setShowPayBySearch] = useState(false);
   const [activePayment, setActivePayment] = useState<{ name: string, upiId: string, avatar?: string } | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
+
+  // Use global transaction state
+  const { transactions, addTransaction } = useTransactions();
+
   const [showHistory, setShowHistory] = useState(false);
   const [selectedTxn, setSelectedTxn] = useState<Transaction | null>(null);
 
@@ -44,14 +57,18 @@ export default function Home() {
   };
 
   const handleTransactionSuccess = (txn: Transaction) => {
-    setTransactions([txn, ...transactions]);
+    addTransaction(txn);
     setTimeout(() => {
       setActivePayment(null);
     }, 2000);
   };
 
+  // ... existing code ...
+
+
+
   return (
-    <div className="min-h-screen bg-[#0A0A0A] pb-24 font-sans text-white relative">
+    <div className="min-h-screen bg-background pb-24 font-sans text-foreground relative">
       <AnimatePresence>
         {showScanner && (
           <QRScanner
@@ -94,17 +111,17 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Header Section */}
-      <div className="sticky top-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-sm px-4 pt-3 pb-2">
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm px-4 pt-3 pb-2">
         <div className="flex items-center gap-3">
           {/* Search Bar */}
           <div className="flex-1 relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
               <Search size={18} />
             </div>
             <input
               type="text"
               placeholder="Pay anyone on UPI"
-              className="w-full bg-[#1C1C1C] border border-gray-800 rounded-full py-2.5 pl-11 pr-4 text-sm font-normal text-white placeholder:text-gray-500 focus:outline-none focus:border-gray-700 transition-all"
+              className="w-full bg-card border border-border rounded-full py-2.5 pl-11 pr-4 text-sm font-normal text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gray-700 transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -112,7 +129,7 @@ export default function Home() {
 
           {/* Profile Icon */}
           <div className="flex-shrink-0">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm cursor-pointer">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm cursor-pointer border border-border">
               {MOCK_USER.avatar}
             </div>
           </div>
@@ -125,7 +142,7 @@ export default function Home() {
         {/* Promotional Banner */}
         <motion.div
           whileTap={{ scale: 0.98 }}
-          className="bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900 rounded-2xl p-5 relative overflow-hidden cursor-pointer"
+          className="bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900 rounded-2xl p-5 relative overflow-hidden cursor-pointer shadow-lg"
         >
           <div className="relative z-10">
             <h3 className="text-lg font-semibold text-white mb-1">Easy EMIs from</h3>
@@ -168,23 +185,23 @@ export default function Home() {
 
         {/* UPI Info Bar */}
         <div className="flex items-center justify-between px-2 py-1.5 text-xs">
-          <div className="flex items-center gap-2 text-gray-400">
-            <div className="w-5 h-5 rounded-full bg-gray-800 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center">
               <Zap size={12} className="text-blue-500" />
             </div>
             <span>Tap & Pay</span>
           </div>
-          <div className="text-gray-400">
+          <div className="text-muted-foreground">
             <span>UPI Lite: ₹{(Math.random() * 100).toFixed(2)}</span>
           </div>
-          <div className="text-gray-400">
+          <div className="text-muted-foreground">
             <span className="truncate max-w-32">UPI ID: {MOCK_USER.upiId}</span>
           </div>
         </div>
 
         {/* People Section */}
         <div>
-          <h2 className="text-base font-semibold text-white mb-4 px-1">People</h2>
+          <h2 className="text-base font-semibold text-foreground mb-4 px-1">People</h2>
           <div className="grid grid-cols-4 gap-y-5 gap-x-2">
             <PersonItem
               name="Luke Skywalker"
@@ -206,13 +223,13 @@ export default function Home() {
             <PersonItem
               name="Rebels Group"
               avatar="R"
-              color="bg-gray-700"
+              color="bg-secondary"
               isGroup
             />
             <PersonItem
               name="Self transfer"
               avatar={<User size={24} />}
-              color="bg-gray-800"
+              color="bg-secondary"
             />
             <PersonItem
               name="Yoda"
@@ -230,48 +247,75 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Recent Transactions */}
+        {/* Bills & Recharges */}
         <div>
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h2 className="text-base font-semibold text-white">Recent transactions</h2>
-            <button
-              onClick={() => setShowHistory(true)}
-              className="text-blue-500 text-sm font-medium"
-            >
-              See all
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-base font-semibold text-foreground">Bills & recharges</h2>
+            <button className="text-blue-400 text-xs font-medium border border-border hover:bg-secondary/50 bg-card rounded-full px-3 py-1 transition-colors">
+              Manage
             </button>
           </div>
-          <div className="space-y-2">
-            {transactions.slice(0, 3).map((txn) => (
-              <motion.div
-                key={txn.id}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedTxn(txn)}
-                className="bg-[#1C1C1C] rounded-xl p-4 flex items-center justify-between cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${txn.type === 'received' ? 'bg-green-600' : 'bg-orange-600'}`}>
-                    {txn.recipient[0]}
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-white text-sm">{txn.recipient}</h4>
-                    <p className="text-xs text-gray-400">
-                      {new Date(txn.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                    </p>
-                  </div>
-                </div>
-                <div className={`font-semibold ${txn.type === 'received' ? 'text-green-500' : 'text-white'}`}>
-                  {txn.type === 'received' ? '+' : '-'} ₹{txn.amount.toFixed(2)}
-                </div>
-              </motion.div>
-            ))}
+          {/* Recent Bills Row */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <BillItem name="HDFC Bank Credit Card" icon={<CreditCard size={20} />} color="bg-red-600" status="Overdue" />
+            <BillItem name="BESCOM" icon={<Zap size={20} />} color="bg-blue-500" />
+            <BillItem name="Jio Prepaid" icon="Jio" color="bg-blue-600" />
+            <BillItem name="Airtel Prepaid" icon="Airtel" color="bg-red-500" />
+          </div>
+          {/* Categories Grid */}
+          <div className="grid grid-cols-4 gap-4">
+            <ActionButton icon={<Smartphone size={24} />} label="Mobile recharge" />
+            <ActionButton icon={<Tv size={24} />} label="DTH / Cable TV" />
+            <ActionButton icon={<Lightbulb size={24} />} label="Electricity" />
+            <ActionButton icon={<Car size={24} />} label="FASTag recharge" />
+          </div>
+        </div>
+
+        {/* Businesses */}
+        <div>
+          <h2 className="text-base font-semibold text-foreground mb-4 px-1">Businesses</h2>
+          <div className="grid grid-cols-4 gap-4">
+            <PersonItem name="Dex's Diner" avatar="D" color="bg-orange-500" />
+            <PersonItem name="Watto's Junk" avatar="W" color="bg-blue-600" />
+            <PersonItem name="Imperial Cargo" avatar="I" color="bg-red-700" />
+            <MoreButton label="More" />
+          </div>
+        </div>
+
+        {/* Manage your money */}
+        <div>
+          <h2 className="text-xl font-normal text-foreground mb-6 px-1">Manage your money</h2>
+          {/* Cards */}
+          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide mb-2">
+            <MoneyCard
+              icon={<FileText size={20} className="text-blue-400" />}
+              title="Personal loan"
+              subtitle="Up to ₹10 lakh, instant approval"
+              action="Apply now"
+            />
+            <MoneyCard
+              icon={<Coins size={20} className="text-yellow-400" />}
+              title="Gold loan"
+              subtitle="Interest rate starting at 0.96% monthly"
+              action="Apply now"
+            />
+          </div>
+          {/* List items */}
+          <div className="space-y-1">
+            <MoneyListItem icon={<Gauge size={20} className="text-blue-500" />} label="Check your CIBIL score for free" />
+            <MoneyListItem
+              icon={<History size={20} className="text-blue-500" />}
+              label="See transaction history"
+              onClick={() => setLocation('/money')}
+            />
+            <MoneyListItem icon={<Landmark size={20} className="text-blue-500" />} label="Check bank balance" />
           </div>
         </div>
 
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 w-full bg-[#0A0A0A] border-t border-gray-900 py-2 px-6 flex justify-around items-center z-50">
+      <div className="fixed bottom-0 left-0 w-full bg-background border-t border-border py-2 px-6 flex justify-around items-center z-50">
         <NavItem
           icon={<HomeIcon size={24} />}
           label="Home"
@@ -300,10 +344,10 @@ export default function Home() {
 function NavItem({ icon, label, isActive, onClick }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void }) {
   return (
     <button onClick={onClick} className="flex flex-col items-center gap-0.5 min-w-16 py-1.5">
-      <div className={`transition-colors ${isActive ? 'text-blue-500' : 'text-gray-500'}`}>
+      <div className={`transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
         {icon}
       </div>
-      {isActive && <span className="text-[10px] font-medium text-blue-500">{label}</span>}
+      {isActive && <span className="text-[10px] font-medium text-primary">{label}</span>}
     </button>
   );
 }
@@ -321,10 +365,10 @@ function ActionButton({ icon, label, onClick }: ActionButtonProps) {
       onClick={onClick}
       className="flex flex-col items-center gap-2.5 cursor-pointer"
     >
-      <div className="w-full aspect-square bg-blue-700 hover:bg-blue-600 rounded-2xl flex items-center justify-center text-white transition-colors shadow-lg shadow-blue-900/30">
+      <div className="w-full aspect-square bg-blue-700 hover:bg-blue-600 rounded-2xl flex items-center justify-center text-white transition-colors shadow-lg shadow-blue-900/10 border border-transparent dark:border-blue-500/30">
         {icon}
       </div>
-      <span className="text-[0.7rem] text-center text-gray-300 font-medium leading-tight">{label}</span>
+      <span className="text-[0.7rem] text-center text-muted-foreground font-medium leading-tight">{label}</span>
     </motion.div>
   );
 }
@@ -338,11 +382,12 @@ interface PersonItemProps {
   isGroup?: boolean;
 }
 
-function PersonItem({ name, avatar, onClick, color = "bg-blue-600", hasNotification, isGroup }: PersonItemProps) {
+function PersonItem({ name, avatar, onClick, color, hasNotification, isGroup }: PersonItemProps) {
+  const bgColor = color || 'bg-blue-600';
   return (
     <div onClick={onClick} className="flex flex-col items-center gap-2 cursor-pointer group">
       <div className="relative">
-        <div className={`w-14 h-14 rounded-full ${color} flex items-center justify-center text-white text-lg font-semibold overflow-hidden group-hover:scale-105 transition-transform`}>
+        <div className={`w-14 h-14 rounded-full ${bgColor} flex items-center justify-center text-white text-lg font-semibold overflow-hidden group-hover:scale-105 transition-transform border border-transparent dark:border-white/10`}>
           {typeof avatar === 'string' && avatar.startsWith('http') ? (
             <img src={avatar} alt={name} className="w-full h-full object-cover" />
           ) : typeof avatar === 'string' ? (
@@ -352,15 +397,15 @@ function PersonItem({ name, avatar, onClick, color = "bg-blue-600", hasNotificat
           )}
         </div>
         {hasNotification && (
-          <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-teal-500 rounded-full border-2 border-[#0A0A0A]" />
+          <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-teal-500 rounded-full border-2 border-background" />
         )}
         {isGroup && (
-          <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-white rounded-full border-2 border-[#0A0A0A] flex items-center justify-center">
-            <span className="text-[10px] text-gray-900 font-bold">3</span>
+          <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-card rounded-full border-2 border-background flex items-center justify-center">
+            <span className="text-[10px] text-foreground font-bold">3</span>
           </div>
         )}
       </div>
-      <span className="text-[0.7rem] text-gray-300 font-medium truncate w-full text-center">{name}</span>
+      <span className="text-[0.7rem] text-muted-foreground font-medium truncate w-full text-center">{name}</span>
     </div>
   );
 }
@@ -368,12 +413,59 @@ function PersonItem({ name, avatar, onClick, color = "bg-blue-600", hasNotificat
 function MoreButton({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center gap-2 cursor-pointer group">
-      <div className="w-14 h-14 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center text-gray-400 group-hover:bg-gray-700 transition-colors">
+      <div className="w-14 h-14 rounded-full bg-secondary border-2 border-border flex items-center justify-center text-muted-foreground group-hover:bg-secondary/80 transition-colors">
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </div>
-      <span className="text-[0.7rem] text-gray-300 font-medium">{label}</span>
+      <span className="text-[0.7rem] text-muted-foreground font-medium">{label}</span>
     </div>
+  );
+}
+
+function BillItem({ name, icon, color, status }: { name: string, icon: React.ReactNode | string, color: string, status?: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 cursor-pointer">
+      <div className="relative">
+        <div className={`w-14 h-14 rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-border`}>
+          {typeof icon === 'string' ? (
+            <span className={`text-[10px] font-bold ${color === 'bg-blue-600' ? 'text-blue-600' : 'text-red-600'}`}>{icon}</span>
+          ) : (
+            <div className={color === 'bg-red-600' ? 'text-red-600' : 'text-blue-500'}>{icon}</div>
+          )}
+        </div>
+        {status && (
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[9px] px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap">
+            {status}
+          </div>
+        )}
+      </div>
+      <span className="text-[0.7rem] text-muted-foreground font-medium truncate w-full text-center leading-tight">{name}</span>
+    </div>
+  );
+}
+
+function MoneyCard({ icon, title, subtitle, action }: { icon: React.ReactNode, title: string, subtitle: string, action: string }) {
+  return (
+    <div className="min-w-[160px] max-w-[160px] bg-card rounded-2xl p-4 flex flex-col h-full border border-border">
+      <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center mb-3">
+        {icon}
+      </div>
+      <h3 className="text-sm font-medium text-foreground mb-1">{title}</h3>
+      <p className="text-[10px] text-muted-foreground mb-4 leading-relaxed">{subtitle}</p>
+      <span className="text-xs text-blue-400 font-medium mt-auto">{action}</span>
+    </div>
+  );
+}
+
+function MoneyListItem({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick?: () => void }) {
+  return (
+    <button onClick={onClick} className="w-full flex items-center justify-between p-3 hover:bg-card/50 rounded-xl transition-colors group">
+      <div className="flex items-center gap-4">
+        <div className="text-blue-500">{icon}</div>
+        <span className="text-sm text-foreground font-medium">{label}</span>
+      </div>
+      <ChevronRight size={16} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+    </button>
   );
 }
