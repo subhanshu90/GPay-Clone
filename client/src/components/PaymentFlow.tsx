@@ -80,66 +80,88 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col h-full">
+    <motion.div
+      initial={{ y: "100%" }}
+      animate={{ y: 0 }}
+      exit={{ y: "100%" }}
+      transition={{ type: "spring", damping: 25, stiffness: 200 }}
+      className="fixed inset-0 bg-white z-[9999] flex flex-col"
+    >
       {step === 'amount' && (
-        <>
-          <div className="p-4 flex items-center gap-4">
-            <button onClick={onClose}><ArrowLeft size={24} /></button>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-lg font-medium">
+        <div className="flex-1 bg-white relative flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 relative z-10">
+            <button onClick={onClose} className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
+              <ArrowLeft className="text-gray-800" size={24} />
+            </button>
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold mb-1 shadow-sm">
                 {recipient.avatar || recipient.name[0]}
               </div>
-              <div>
-                <h3 className="font-medium text-lg text-gray-900 leading-tight">{recipient.name}</h3>
-                <p className="text-sm text-gray-500 font-medium">{recipient.upiId}</p>
-                <div className="flex items-center gap-1 text-xs text-green-700 mt-0.5">
-                  <ShieldCheck size={12} fill="currentColor" className="text-green-700" />
-                  <span>Verified Name: {recipient.name}</span>
-                </div>
-              </div>
+              <h2 className="font-semibold text-gray-900 text-sm">Paying {recipient.name}</h2>
+              <p className="text-xs text-gray-500">{recipient.upiId}</p>
             </div>
+            <button className="p-2 -mr-2 rounded-full hover:bg-gray-100 transition-colors">
+              <MoreVertical className="text-gray-800" size={24} />
+            </button>
           </div>
 
-          <div className="flex-1 flex flex-col items-center justify-center p-6">
-            <div className="relative w-full max-w-[280px] text-center">
-              <span className="absolute top-1/2 -translate-y-1/2 left-0 text-3xl font-medium text-gray-700">₹</span>
+          {/* Amount Input */}
+          <div className="flex-1 flex flex-col items-center justify-center -mt-10">
+            <div className="flex items-center justify-center w-full px-8 mb-6">
+              <span className="text-4xl font-semibold text-gray-900 mr-1">₹</span>
               <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
                 autoFocus
-                className="w-full text-center text-6xl font-medium text-gray-900 placeholder:text-gray-300 border-none outline-none focus:ring-0 focus:outline-none p-0 pl-6 bg-transparent"
+                type="tel"
+                inputMode="decimal"
+                pattern="[0-9]*"
+                value={amount}
+                placeholder="0"
+                onChange={(e) => {
+                  // Allow only numbers and decimal point
+                  if (/^\d*\.?\d*$/.test(e.target.value)) {
+                    setAmount(e.target.value);
+                  }
+                }}
+                className="text-6xl font-semibold text-gray-900 bg-transparent text-center w-full focus:outline-none placeholder:text-gray-300"
               />
             </div>
 
-            <input
-              type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Add a note"
-              className="mt-6 text-center bg-gray-100 rounded-full py-2 px-6 text-sm font-medium w-48 focus:outline-none focus:bg-gray-200 transition-colors"
-            />
+            {/* Note Input */}
+            <div className="w-64 px-4 py-3 bg-gray-100 rounded-full flex items-center justify-center transition-colors focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-500 border border-transparent focus-within:border-blue-500">
+              <input
+                type="text"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Add a note"
+                className="bg-transparent text-center w-full text-base text-gray-900 placeholder:text-gray-500 focus:outline-none font-medium"
+              />
+            </div>
           </div>
 
-          <div className="p-4 bg-gray-50 rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-8">
-            <div className="flex items-center justify-between px-4 py-3 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-200">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/SBI-logo.svg" className="w-6 h-6" alt="Bank" />
+          {/* Bottom Action Area */}
+          <div className="p-4 pb-12 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+            {amount && (
+              <div className="flex items-center justify-between mb-4 px-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center border border-blue-200">
+                    <span className="text-blue-700 font-bold text-xs">
+                      {MOCK_USER.bankAccount.bankName.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-gray-900">{MOCK_USER.bankAccount.bankName} •••• {MOCK_USER.bankAccount.accountNumber.slice(-4)}</span>
+                    <span className="text-[10px] text-gray-500">Savings Account</span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-gray-900">{MOCK_USER.bankAccount.bankName} •••• {MOCK_USER.bankAccount.accountNumber.slice(-4)}</span>
-                  <span className="text-xs text-gray-500">Savings Account</span>
-                </div>
+                <ChevronDown size={16} className="text-gray-400" />
               </div>
-              <ChevronDown size={20} className="text-gray-500" />
-            </div>
+            )}
 
             <button
               disabled={!amount}
               onClick={() => setStep('pin')}
-              className="w-full bg-blue-600 text-white font-medium py-3.5 rounded-full shadow-lg shadow-blue-200 disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98]"
+              className="w-full bg-blue-600 text-white font-medium py-4 rounded-full shadow-lg shadow-blue-200 disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98] text-lg"
             >
               Pay ₹{amount || '0'}
             </button>
@@ -148,7 +170,7 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
               <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" className="h-4 opacity-60" alt="UPI" />
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {step === 'pin' && (
@@ -248,7 +270,11 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
       )}
 
       {step === 'success' && currentTxn && (
-        <div className="flex-1 flex flex-col bg-[#0A0A0A] text-white">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex-1 flex flex-col bg-[#0A0A0A] text-white"
+        >
           {/* Success Content */}
           <div className="flex-1 flex flex-col items-center justify-center px-6">
             {/* Blue Check Icon */}
@@ -262,7 +288,7 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
             </motion.div>
 
             {/* Amount */}
-            <h2 className="text-4xl font-medium mb-6">₹{currentTxn.amount.toFixed(2)}</h2>
+            <h2 className="text-4xl font-medium mb-6">₹{Number(currentTxn.amount).toFixed(2)}</h2>
 
             {/* Payment Details */}
             <div className="text-center space-y-1 mb-8">
@@ -283,7 +309,7 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
           </div>
 
           {/* Bottom Actions */}
-          <div className="p-4 pb-6 space-y-3">
+          <div className="p-4 pb-12 space-y-3">
             <button
               onClick={() => {
                 onSuccess(currentTxn);
@@ -298,8 +324,9 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
               Share screenshot
             </button>
           </div>
-        </div>
+        </motion.div>
       )}
-    </div>
+
+    </motion.div>
   );
 }
