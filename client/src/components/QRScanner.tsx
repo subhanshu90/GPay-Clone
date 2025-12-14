@@ -12,6 +12,7 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
   const [scanning, setScanning] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isScanning = useRef(false);
 
@@ -25,8 +26,8 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
 
         const config = {
           fps: 10,
-          qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0,
+          // Removed qrbox to prevent library from drawing white scanning box
         };
 
         await scanner.start(
@@ -110,11 +111,51 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
   useEffect(() => {
     const style = document.createElement('style');
     style.innerHTML = `
+      /* Force video to fill the screen */
       #qr-reader video {
         object-fit: cover !important;
         width: 100% !important;
         height: 100% !important;
         border-radius: 0 !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+      }
+      
+      /* Hide ALL html5-qrcode UI elements */
+      #qr-shaded-region {
+        display: none !important;
+        background: none !important;
+      }
+      
+      /* Hide the scanning region borders and overlays */
+      #qr-reader__scan_region,
+      #qr-reader__scan_region > div,
+      #qr-reader__scan_region > img,
+      #qr-reader > div:not([id*="video"]) {
+        border: none !important;
+        background: none !important;
+        box-shadow: none !important;
+        display: none !important;
+      }
+      
+      /* Hide any dashboard or status elements */
+      #qr-reader__dashboard,
+      #qr-reader__dashboard_section,
+      #qr-reader__dashboard_section_csr,
+      #qr-reader__dashboard_section_swaplink,
+      #qr-reader__dashboard_section_fsr {
+        display: none !important;
+      }
+      
+      /* Keep ONLY the video visible */
+      #qr-reader {
+        background: transparent !important;
+      }
+      
+      #qr-reader video {
+        display: block !important;
+        z-index: 0 !important;
       }
     `;
     document.head.appendChild(style);
@@ -156,27 +197,29 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
       {/* Scanning Frame with Colorful Corners - Centered */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] z-20 pointer-events-none">
 
-        {/* Corner Brackets */}
+
+
+        {/* Corner Brackets - Moved slightly outside to match screenshots */}
         {/* Top Left - Red to Pink */}
-        <div className="absolute top-0 left-0 w-12 h-12">
+        <div className="absolute -top-1 -left-1 w-12 h-12">
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full" />
           <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-red-500 to-pink-500 rounded-full" />
         </div>
 
         {/* Top Right - Orange to Yellow */}
-        <div className="absolute top-0 right-0 w-12 h-12">
+        <div className="absolute -top-1 -right-1 w-12 h-12">
           <div className="absolute top-0 right-0 w-full h-1.5 bg-gradient-to-l from-orange-500 to-yellow-500 rounded-full" />
           <div className="absolute top-0 right-0 w-1.5 h-full bg-gradient-to-b from-orange-500 to-yellow-500 rounded-full" />
         </div>
 
         {/* Bottom Left - Blue to Cyan */}
-        <div className="absolute bottom-0 left-0 w-12 h-12">
+        <div className="absolute -bottom-1 -left-1 w-12 h-12">
           <div className="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" />
           <div className="absolute bottom-0 left-0 w-1.5 h-full bg-gradient-to-t from-blue-500 to-cyan-500 rounded-full" />
         </div>
 
         {/* Bottom Right - Green to Emerald */}
-        <div className="absolute bottom-0 right-0 w-12 h-12">
+        <div className="absolute -bottom-1 -right-1 w-12 h-12">
           <div className="absolute bottom-0 right-0 w-full h-1.5 bg-gradient-to-l from-green-500 to-emerald-500 rounded-full" />
           <div className="absolute bottom-0 right-0 w-1.5 h-full bg-gradient-to-t from-green-500 to-emerald-500 rounded-full" />
         </div>
@@ -194,8 +237,8 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
         </motion.div>
       )}
 
-      {/* Upload from Gallery Button */}
-      <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-50">
+      {/* Upload from Gallery Button - Positioned higher */}
+      <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-50 transition-all duration-300" style={{ marginBottom: showFeedback ? '180px' : '0' }}>
         <button className="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-full flex items-center gap-2 font-medium shadow-lg hover:bg-white/30 transition-colors">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -223,21 +266,45 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
         </div>
       )}
 
-      {/* Bottom Feedback Section */}
-      <div className="absolute bottom-0 left-0 right-0 z-50">
-        <div className="border-t border-white/10 rounded-t-3xl bg-gray-900/90 backdrop-blur-md p-6 pb-8">
-          <div className="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4" />
-          <p className="text-center text-white/90 font-medium mb-2">Is the QR not working?</p>
-          <div className="flex gap-3 mt-4">
-            <button className="flex-1 bg-white/10 text-white py-3 rounded-full font-medium border border-white/20">
-              Not now
-            </button>
-            <button className="flex-1 bg-blue-500 text-white py-3 rounded-full font-medium">
-              Send feedback
-            </button>
+      {/* Bottom Feedback Section - Collapsible */}
+      <motion.div
+        initial={{ y: "85%" }}
+        animate={{ y: showFeedback ? 0 : "85%" }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={0.2}
+        onDragEnd={(_, info) => {
+          if (info.offset.y < -50) setShowFeedback(true);
+          if (info.offset.y > 50) setShowFeedback(false);
+        }}
+        className="absolute bottom-0 left-0 right-0 z-[60]"
+      >
+        <div
+          className="border-t border-white/10 rounded-t-3xl bg-[#1f1f1f] p-6 pb-8"
+          onClick={() => setShowFeedback(!showFeedback)}
+        >
+          <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+          <p className="text-center text-white/90 font-medium mb-1">Is the QR not working?</p>
+
+          <div className={`transition-opacity duration-300 ${showFeedback ? 'opacity-100 mt-6' : 'opacity-0 h-0 overflow-hidden'}`}>
+            <p className="text-center text-gray-400 text-sm mb-6 px-8">
+              If you're facing issues scanning the QR code, you can try uploading it from your gallery or type the UPI ID manually.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowFeedback(false); }}
+                className="flex-1 bg-white/10 text-white py-3 rounded-full font-medium border border-white/20"
+              >
+                Not now
+              </button>
+              <button className="flex-1 bg-blue-500 text-white py-3 rounded-full font-medium">
+                Send feedback
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
