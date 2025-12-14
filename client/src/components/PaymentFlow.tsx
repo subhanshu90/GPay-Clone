@@ -80,13 +80,21 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
     // Don't call onSuccess here - only when Done button is clicked
   };
 
+  // Lock body scroll when component is mounted
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   return (
     <motion.div
       initial={{ y: "100%" }}
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-background z-[9999] flex flex-col text-foreground"
+      className="fixed inset-0 h-[100dvh] w-screen bg-background z-[9999] flex flex-col text-foreground overscroll-none overflow-hidden touch-none"
     >
       {step === 'amount' && (
         <div className="flex-1 bg-background relative flex flex-col h-full">
