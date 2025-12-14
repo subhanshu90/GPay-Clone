@@ -91,37 +91,39 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
       {step === 'amount' && (
         <div className="flex-1 bg-background relative flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 relative z-10">
-            <button onClick={onClose} className="p-2 -ml-2">
+          <div className="flex items-center justify-between p-4 relative z-10 shrink-0">
+            <button onClick={onClose} className="p-2 -ml-2 rounded-full hover:bg-muted/20 transition-colors">
               <X className="text-foreground" size={24} />
             </button>
             <div className="flex gap-2">
-              <button className="p-2 -mr-2">
+              <button className="p-2 -mr-2 rounded-full hover:bg-muted/20 transition-colors">
                 <AlertCircle className="text-foreground" size={24} />
               </button>
-              <button className="p-2 -mr-2">
+              <button className="p-2 -mr-2 rounded-full hover:bg-muted/20 transition-colors">
                 <MoreVertical className="text-foreground" size={24} />
               </button>
             </div>
           </div>
 
-          {/* Recipient Info */}
-          <div className="flex flex-col items-center mt-4 px-4">
-            <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-3 shadow-lg">
+          {/* Recipient Info - Compact & Centered */}
+          <div className="flex flex-col items-center pt-8 px-4 shrink-0 pointer-events-none select-none">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3 shadow-md">
               {recipient.avatar || recipient.name[0]}
             </div>
-            <h2 className="font-medium text-foreground text-base mb-1">Paying {recipient.name}</h2>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-              <ShieldCheck size={12} className="text-green-500" />
-              <span>Banking name: {recipient.name}</span>
+            <h2 className="font-semibold text-foreground text-lg mb-1">Paying {recipient.name}</h2>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+              <ShieldCheck size={14} className="text-green-500 fill-current" />
+              <span className="font-medium">Banking name: {recipient.name}</span>
             </div>
-            <p className="text-xs text-muted-foreground">{recipient.upiId?.split('@')[1]} • {recipient.upiId}</p>
+            <p className="text-sm text-muted-foreground">{recipient.upiId}</p>
           </div>
 
-          {/* Amount Input */}
-          <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-4">
-            <div className="flex items-center justify-center w-full mb-6">
-              <span className="text-6xl font-light text-foreground mr-3">₹</span>
+          {/* Amount Input Section - Vertically Centered */}
+          <div className="flex-1 flex flex-col items-center pt-12 text-center">
+            <div className="flex items-center justify-center w-full mb-6 relative px-8">
+              <span className={`font-normal text-foreground transition-all duration-200 ${amount ? 'text-5xl translate-y-[-4px]' : 'text-4xl text-muted-foreground'}`}>
+                ₹
+              </span>
               <input
                 autoFocus
                 type="tel"
@@ -134,30 +136,40 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
                     setAmount(e.target.value);
                   }
                 }}
-                className="text-8xl font-light text-foreground bg-transparent text-center focus:outline-none placeholder:text-muted-foreground w-auto"
-                style={{ caretColor: 'currentColor', minWidth: '120px' }}
+                className="font-normal text-foreground bg-transparent text-left focus:outline-none placeholder:text-muted-foreground/30 ml-1 transition-all duration-200"
+                style={{
+                  fontSize: amount ? '5rem' : '4rem',
+                  caretColor: 'currentColor',
+                  width: amount ? `${amount.length + 0.5}ch` : '1.5ch',
+                  maxWidth: '100%'
+                }}
               />
             </div>
 
-            {/* Note Button */}
-            <button className="px-8 py-3 bg-secondary text-secondary-foreground rounded-full text-sm font-medium hover:bg-secondary/80 transition-colors border border-border">
+            {/* Note Pill */}
+            <button className="px-6 py-2.5 bg-muted/50 text-foreground rounded-full text-sm font-medium hover:bg-muted transition-colors border border-border/50 flex items-center gap-2">
               Add note
             </button>
           </div>
 
-          {/* Next Button - Floating */}
-          {amount && (
-            <div className="fixed bottom-28 right-6 z-50">
-              <button
-                onClick={() => setStep('pin')}
-                className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center shadow-2xl hover:bg-blue-600 transition-all active:scale-95"
+          {/* Floating Next Button */}
+          <AnimatePresence>
+            {amount && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                className="fixed bottom-8 right-6 z-50"
               >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          )}
+                <button
+                  onClick={() => setStep('pin')}
+                  className="w-14 h-14 bg-[#1A73E8] rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl hover:bg-blue-600 transition-all active:scale-95"
+                >
+                  <ChevronRight size={32} className="text-white ml-0.5" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 
