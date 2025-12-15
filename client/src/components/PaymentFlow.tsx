@@ -156,7 +156,6 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
                   ₹
                 </span>
                 <input
-                  autoFocus
                   type="tel"
                   inputMode="decimal"
                   pattern="[0-9]*"
