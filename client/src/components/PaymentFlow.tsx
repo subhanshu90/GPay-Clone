@@ -80,11 +80,29 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
     // Don't call onSuccess here - only when Done button is clicked
   };
 
-  // Lock body scroll when component is mounted
+  // Lock body scroll and reset scroll position when component mounts
   useEffect(() => {
+    // Save current scroll position
+    const scrollY = window.scrollY;
+
+    // Lock body scroll
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+
+    // Reset window scroll to top
+    window.scrollTo(0, 0);
+
     return () => {
-      document.body.style.overflow = 'unset';
+      // Restore body styles
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+
+      // Restore scroll position
+      window.scrollTo(0, scrollY);
     };
   }, []);
 
@@ -97,7 +115,10 @@ export default function PaymentFlow({ recipient, onClose, onSuccess }: PaymentFl
       className="fixed inset-0 h-[100dvh] w-screen bg-background z-[9999] flex flex-col text-foreground overscroll-none overflow-hidden touch-none"
     >
       {step === 'amount' && (
-        <div className="flex flex-col h-full relative overflow-y-auto">
+        <div className="flex flex-col h-full relative">
+          {/* Solid Backdrop */}
+          <div className="absolute inset-0 bg-background -z-10" />
+
           {/* Header */}
           <div className="flex items-center justify-between p-4 shrink-0">
             <button onClick={onClose} className="p-2 -ml-2 rounded-full hover:bg-muted/20 transition-colors">
