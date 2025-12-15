@@ -25,9 +25,14 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
         scannerRef.current = scanner;
 
         const config = {
-          fps: 30, // Increased for better detection
-          qrbox: { width: 280, height: 280 },
-          aspectRatio: 1.0,
+          fps: 30,
+          qrbox: 250, // Use number instead of object for better iOS compatibility
+          disableFlip: false, // Allow camera flip for iOS
+          videoConstraints: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
         };
 
         await scanner.start(
@@ -159,7 +164,7 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
           <defs>
             <mask id="mask">
               <rect width="100%" height="100%" fill="white" />
-              <rect x="50%" y="50%" width="280" height="280" rx="24" ry="24" transform="translate(-140, -140)" fill="black" />
+              <rect x="50%" y="50%" width="250" height="250" rx="24" ry="24" transform="translate(-125, -125)" fill="black" />
             </mask>
           </defs>
           <rect width="100%" height="100%" fill="rgba(0,0,0,0.6)" mask="url(#mask)" />
@@ -179,7 +184,7 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
       </div>
 
       {/* Scanning Frame with Colorful Corners - Centered */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] z-20 pointer-events-none">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] z-20 pointer-events-none">
 
 
 
