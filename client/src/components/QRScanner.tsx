@@ -25,9 +25,9 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
         scannerRef.current = scanner;
 
         const config = {
-          fps: 10,
+          fps: 30, // Increased for better detection
+          qrbox: { width: 280, height: 280 },
           aspectRatio: 1.0,
-          qrbox: { width: 280, height: 280 }, // Define scanning region (required for detection)
         };
 
         await scanner.start(
@@ -37,11 +37,12 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
             // Successfully scanned
             if (!isScanning.current) return;
 
-            console.log("QR Code scanned:", decodedText);
+            console.log("QR Code detected:", decodedText);
 
-            // Parse UPI URL
-            if (decodedText.startsWith("upi://")) {
+            // Accept any UPI format (upi://, upi:pay, or even plain text)
+            if (decodedText.toLowerCase().includes("upi")) {
               isScanning.current = false;
+              console.log("Valid UPI code detected, stopping scanner...");
               // Stop scanner before calling onScan
               if (scanner && scanner.isScanning) {
                 scanner.stop().then(() => {
@@ -51,13 +52,14 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
                 onScan(decodedText);
               }
             } else {
+              console.log("Non-UPI code detected:", decodedText);
               setError("Invalid QR code. Please scan a UPI payment QR code.");
               setTimeout(() => setError(null), 3000);
             }
           },
           (errorMessage) => {
             // Scanner is running but no QR detected - this is normal
-            // Don't show error for this
+            // Optionally log for debugging: console.log("Scan error:", errorMessage);
           }
         );
 
@@ -107,7 +109,6 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
     }
   };
 
-  // Add global style for the scanner video to ensure it covers the screen
   useEffect(() => {
     const style = document.createElement('style');
     style.innerHTML = `
@@ -116,30 +117,12 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
         object-fit: cover !important;
         width: 100% !important;
         height: 100% !important;
-        border-radius: 0 !important;
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
       }
       
-      /* Hide ALL html5-qrcode UI elements */
-      #qr-shaded-region {
-        display: none !important;
-        background: none !important;
-      }
-      
-      /* Hide the scanning region borders and overlays */
-      #qr-reader__scan_region,
-      #qr-reader__scan_region > div,
-      #qr-reader__scan_region > img,
-      #qr-reader > div:not([id*="video"]) {
-        border: none !important;
-        background: none !important;
-        box-shadow: none !important;
-        display: none !important;
-      }
-      
-      /* Hide any dashboard or status elements */
+      /* Hide the default UI elements but keep canvas visible */
       #qr-reader__dashboard,
       #qr-reader__dashboard_section,
       #qr-reader__dashboard_section_csr,
@@ -148,14 +131,15 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
         display: none !important;
       }
       
-      /* Keep ONLY the video visible */
+      /* Ensure the reader container doesn't interfere */
       #qr-reader {
         background: transparent !important;
+        position: relative !important;
       }
       
-      #qr-reader video {
-        display: block !important;
-        z-index: 0 !important;
+      /* Keep scanning canvas visible but hide borders */
+      #qr-reader canvas {
+        display: none !important;
       }
     `;
     document.head.appendChild(style);
