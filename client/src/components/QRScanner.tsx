@@ -27,7 +27,7 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
         const config = {
           fps: 10,
           aspectRatio: 1.0,
-          // Removed qrbox to prevent library from drawing white scanning box
+          qrbox: { width: 280, height: 280 }, // Define scanning region (required for detection)
         };
 
         await scanner.start(
